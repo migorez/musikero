@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.bubble.musikero">
+
+    <uses-sdk
+        android:minSdkVersion="15"
+        android:targetSdkVersion="15" />
+
+    <!--
+     Requerida por el metodo setWakeLock de nuestro objeto MediaPlayer. Este otorga el permiso
+     de permitir apagar la pantalla del dispositivo y seguir utilizando el procesador
+    -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".view.MainActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name=".controlador.Reproduccion.MusicPlayerService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.bubble.musikero.action.PLAY" />
+                <action android:name="com.bubble.musikero.action.STOP" />
+                <action android:name="com.bubble.musikero.action.PAUSE" />
+                <action android:name="com.bubble.musikero.action.NEXT" />
+                <action android:name="com.bubble.musikero.action.PREV" />
+                <action android:name="com.bubble.musikero.action.ADDTAIL" />
+                <action android:name="com.bubble.musikero.action.PLAYALL" />
+            </intent-filter>
+        </service>
+    </application>
+
+</manifest>

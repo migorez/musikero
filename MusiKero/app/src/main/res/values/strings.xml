@@ -1,0 +1,49 @@
+<resources>
+    <string name="app_name">MusiKero</string>
+    <string name="action_settings">Settings</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+
+    <!-- CONSTANTES DEL CODIGO -->
+    <!-- Fragmentos Secciones, o Paginas -->
+    <string name="nom_secc_archivos">archivos</string>
+    <string name="nom_secc_selections">selections</string>
+    <string name="nom_secc_player">player_view</string>
+    <integer name="position_secc_archivos">0</integer>
+    <integer name="position_secc_selections">1</integer>
+    <integer name="position_secc_player_view">2</integer>
+
+    <string name="shared_preferences_playlists">musikero_playlists</string>
+    <string name="shaprefs_uri_last_song">last_song</string>
+    <string name="shaprefs_last_list">last_list</string>
+
+    <!-- Etiquetas y Titulos -->
+    <string name="label_tab_songs">Canciones</string>
+    <string name="label_tab_folders">Carpetas</string>
+    <string name="label_tab_playlists">Listas</string>
+    <string name="label_tab_player">Player</string>
+
+    <string name="texto_listview_vacio">No Files to show</string>
+
+    <!-- widgets -->
+    <string name="lbl_title_present">Reproduciendo: </string>
+
+    <string-array name="playlist_spinner_items">
+        <item>Reproducir todo</item>
+        <item>Añadido a cola</item>
+        <item>Selección actual</item>
+    </string-array>
+    <!---->
+
+    <!-- VARIABLES
+    <string name="context_menu_play">context_menu_play</string>-->
+
+    <!-- MENUs -->
+    <string name="context_menu_play_item">Reproducir</string>
+    <string name="context_menu_add_to_tail">Añadir a cola</string>
+    <string name="context_menu_add_to_playlist">Añadir a lista</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+
+</resources>

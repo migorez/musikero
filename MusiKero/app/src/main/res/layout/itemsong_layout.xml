@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="60sp"
+    android:orientation="horizontal">
+
+    <FrameLayout
+        tools:background="@mipmap/ic_launcher"
+        android:id="@+id/image_framelayout"
+        android:layout_height="match_parent"
+        android:layout_width="60sp">
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:layout_width="200sp">
+
+        <TextView
+            android:text="display name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/txv_song_name"
+            android:elevation="0dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="60sp"
+        android:layout_height="match_parent"
+        android:gravity="bottom|right|end">
+
+        <TextView
+            android:text="00:00"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/txv_song_duration" />
+    </LinearLayout>
+
+</LinearLayout>

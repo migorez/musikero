@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--http://android-morefast.blogspot.com.co/2017/04/como-utilizar-y-disenar-un-seekbar-en.html
+http://andygardenforever.blogspot.com.co/2014/04/create-your-own-custom-seek-bar-with.html-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@android:id/background">
+        <shape android:shape="rectangle">
+            <solid android:color="#b1bbe8"></solid>
+            <corners android:radius="8dp"></corners>
+        </shape>
+    </item>
+    <item android:id="@android:id/progress">
+        <clip>
+            <shape android:shape="rectangle">
+                <solid android:color="#ffdcc73c"></solid>
+                <corners android:radius="8dp"></corners>
+            </shape>
+        </clip>
+    </item>
+</layer-list>
