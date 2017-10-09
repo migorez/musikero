@@ -46,6 +46,12 @@ public class PlayItemProvider {
         if (storage_state.equals(Environment.MEDIA_MOUNTED) ||
                 storage_state.equals(Environment.MEDIA_MOUNTED_READ_ONLY)) {
             // parametros de la consulta al proveedor de contenidos
+            String[] projection = new String[]{
+                    MediaStore.Audio.Media._ID,
+                    MediaStore.Audio.Media.DISPLAY_NAME,
+                    MediaStore.Audio.Media.DATA,
+                    MediaStore.Audio.Media.DURATION
+            };
             String selection = MediaStore.Audio.Media.IS_MUSIC + " = 1 AND " +
                     MediaStore.Audio.Media.DISPLAY_NAME + " LIKE ? OR " +
                     MediaStore.Audio.Media.DISPLAY_NAME + " LIKE ?"; // consulta sql regular
@@ -53,22 +59,24 @@ public class PlayItemProvider {
             // utilizamos un cursor de database (sirve igual)
             Cursor cursor = context.getContentResolver().query(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, // la uri hace referencia a un contentprovider que basicamente es un directorio convertido en tabla de datos de su contenido
-                    null, // las columnas elegidas (select id, name, etc.(cols) from ... - como en sql). null = select * (all)
+                    projection, // las columnas elegidas (select id, name, etc.(cols) from ... - como en sql). null = select * (all)
                     selection,
                     selectionArgs,
                     null);
             if (cursor != null && cursor.moveToFirst()) { // si definitivamente hay datos
-                List<PlayItem> device_songs = new ArrayList<>();
-                do {
-                    device_songs.add(new Song(
-                            cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID)),
-                            cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME)),
-                            cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)),
-                            cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION))
-                    ));
-                } while (cursor.moveToNext());
-                cursor.close();
-                return device_songs;
+                if (cursor.moveToFirst()) {
+                    List<PlayItem> device_songs = new ArrayList<>();
+                    do {
+                        device_songs.add(new Song(
+                                cursor.getLong(cursor.getColumnIndex(projection[0])),
+                                cursor.getString(cursor.getColumnIndex(projection[1])),
+                                cursor.getString(cursor.getColumnIndex(projection[2])),
+                                cursor.getLong(cursor.getColumnIndex(projection[3]))
+                        ));
+                    } while (cursor.moveToNext());
+                    cursor.close();
+                    return device_songs;
+                }
             } else {
                 bundle_msg.putString(KEY_HANDLER_MESSAGE, "No hay contenido de música en el dispositivo.");
             }
@@ -80,21 +88,36 @@ public class PlayItemProvider {
         return null;
     }
 
+    /**
+     * Static void that give us the list of folders of reproducible device's files.
+     */
     @Nullable
-    public static List<PlayItem> getPlayFolders(Context context) {
+    static List<PlayItem> getPlayFolders(Context context) {
         List<PlayItem> device_songs = getDeviceSongs(context);
         if (device_songs != null) {
             List<PlayItem> play_folders = new ArrayList<>();
+            // Se recorrera la lista de archivos reproducibles almacenados en el dispositivo,
+            // recorriendo por cada item la lista de las carpetas, definidas estas por la ruta de
+            // cada archivo, para asi agruparlos por las rutas de directorio que comparten,
+            // defieniendo asi la lista de carpetas.
             Song song;
-            String last_folder_name = "";
-            for (PlayItem playitem : device_songs) {
-                song = (Song) playitem;
-                if (!(song.getFolderName().equals(last_folder_name))) {
-                    last_folder_name = song.getFolderName();
-                    play_folders.add(new Folder(
-                            song.getFolderName(),
-                            song.getFolderPath())
-                    );
+            Folder folder;
+            boolean registered_folder;
+            for (PlayItem song_item : device_songs) {
+                song = (Song) song_item;
+                registered_folder = false;
+                for (PlayItem folder_item : play_folders) {
+                    folder = (Folder) folder_item;
+                    if (song.getFolderPath().equals(folder.getPath())) {
+                        registered_folder = true;
+                        folder.addMember(song);
+                        break;
+                    }
+                }
+                if (!registered_folder) {
+                    folder = new Folder(song.getFolderName(), song.getFolderPath());
+                    folder.addMember(song);
+                    play_folders.add(folder);
                 }
             }
             return play_folders;
@@ -102,17 +125,24 @@ public class PlayItemProvider {
         return null;
     }
 
+    /***/
+    /*@Nullable
+    static List<PlayItem> getFolderContent(Context context, String folderPath) {
+        return null;
+    }*/
+
     @Nullable
-    public static List<PlayItem> getPlaylists(Context context) {
+    static List<PlayItem> getPlaylists(Context context) {
         // handler that helps to show messages to the user from a thread
         UIMessager ui_messager = new UIMessager(context);
         Message msg = ui_messager.obtainMessage();
         Bundle bundle_msg = new Bundle();
         String storage_state = Environment.getExternalStorageState();
-        if (storage_state.equals(Environment.MEDIA_MOUNTED)) {
+        if (storage_state.equals(Environment.MEDIA_MOUNTED) ||
+                storage_state.equals(Environment.MEDIA_MOUNTED_READ_ONLY)) {
             String[] projection = new String[] {
                     MediaStore.Audio.Playlists._ID,
-                    MediaStore.Audio.Playlists.NAME
+                    MediaStore.Audio.Playlists.NAME,
             };
             Cursor cursor = context.getContentResolver().query(
                     MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
@@ -142,6 +172,53 @@ public class PlayItemProvider {
         return null;
     }
 
+    /**
+     * */
+    @Nullable
+    static List<PlayItem> getPlaylistContent(Context context, long playlist_id) {
+        // handler that helps to show messages to the user from a thread
+        UIMessager ui_messager = new UIMessager(context);
+        Message msg = ui_messager.obtainMessage();
+        Bundle bundle_msg = new Bundle();
+        String storage_state = Environment.getExternalStorageState();
+        if (storage_state.equals(Environment.MEDIA_MOUNTED) ||
+                storage_state.equals(Environment.MEDIA_MOUNTED_READ_ONLY)) {
+            String[] projection = new String[] {
+                    MediaStore.Audio.Playlists.Members.AUDIO_ID,
+                    MediaStore.Audio.Playlists.Members.DISPLAY_NAME,
+                    MediaStore.Audio.Playlists.Members.DATA,
+                    MediaStore.Audio.Playlists.Members.DURATION
+            };
+            Cursor cursor = context.getContentResolver().query(
+                    MediaStore.Audio.Playlists.Members.getContentUri("external", playlist_id),
+                    projection,
+                    null,
+                    null,
+                    null
+            );
+            if (cursor != null && cursor.moveToFirst()) {
+                List<PlayItem> playlist_content = new ArrayList<>();
+                do {
+                    playlist_content.add(new Song(
+                            cursor.getLong(cursor.getColumnIndex(projection[0])),
+                            cursor.getString(cursor.getColumnIndex(projection[1])),
+                            cursor.getString(cursor.getColumnIndex(projection[2])),
+                            cursor.getInt(cursor.getColumnIndex(projection[3]))
+                    ));
+                } while (cursor.moveToNext());
+                cursor.close();
+                return playlist_content;
+            } else {
+                bundle_msg.putString(KEY_HANDLER_MESSAGE, "No hay elementos guardados en esta lista.");
+            }
+        } else {
+            bundle_msg.putString(KEY_HANDLER_MESSAGE, "Almacenamiento no disponible.");
+        }
+        msg.setData(bundle_msg);
+        msg.sendToTarget();
+        return null;
+    }
+
     // INNER CLASS
 
     // manage messages to the ui, because in general the methods of this class will be used in a thread
@@ -149,7 +226,7 @@ public class PlayItemProvider {
 
         private Context m_context;
 
-        public UIMessager(Context context) {
+        UIMessager(Context context) {
             super(Looper.getMainLooper());
             m_context = context;
         }

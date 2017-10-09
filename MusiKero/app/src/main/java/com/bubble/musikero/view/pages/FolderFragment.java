@@ -1,6 +1,7 @@
 package com.bubble.musikero.view.pages;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -29,10 +30,12 @@ public class FolderFragment extends Fragment implements LoaderManager.LoaderCall
 
     // instancia del widget de la UI para mostrar el listado de objetos tipo Folder
     // https://developer.android.com/guide/topics/ui/layout/recyclerview.html
-    private RecyclerView m_recycler_view;
+    //private RecyclerView m_recycler_view;
 
     // implement RecyclerView.Adapter
     private FolderRecyclerAdapter m_recycler_adapter;
+
+    private static Resources m_resources;
 
     // CONSTRUCTION
 
@@ -50,9 +53,9 @@ public class FolderFragment extends Fragment implements LoaderManager.LoaderCall
     // CONFIG AND INIT
 
     // config view components
-    private void initComponents() {
+    private void initViewComponents(View view) {
         // config form recyclerview
-        m_recycler_view = (RecyclerView) getView().findViewById(R.id.rv_folder_fragment);
+        final RecyclerView m_recycler_view = (RecyclerView) view.findViewById(R.id.rv_folder_fragment);
         m_recycler_view.setLayoutManager(new LinearLayoutManager(getContext()));
         // adapter and data of recyclerview
         m_recycler_adapter = new FolderRecyclerAdapter();
@@ -69,6 +72,7 @@ public class FolderFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        m_resources = getResources();
     }
 
     @Override
@@ -79,7 +83,7 @@ public class FolderFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        initComponents();
+        initViewComponents(getView());
         loadRecyclerView();
     }
 
@@ -124,17 +128,17 @@ public class FolderFragment extends Fragment implements LoaderManager.LoaderCall
 
     // metodo versatil para la recarga de la lista
     private void loadRecyclerView() {
+        Bundle bundle_args = new Bundle();
+        bundle_args.putString(PlayItemLoader.ARG_TYPELIST_LOAD, Folder.ITEMTYPE);
         getLoaderManager().restartLoader // loader instance flag, bundle data, load reacts listener
-                (FolderFragment.this.INSTANCE_LOADER_MANAGER, null, FolderFragment.this);
+                (INSTANCE_LOADER_MANAGER, bundle_args, FolderFragment.this);
     }
 
     // load recyclerview data asyncronously
     @Override
     public Loader<List<PlayItem>> onCreateLoader(int id, Bundle args) {
         // create a new asyncloader that recover the data
-        Bundle bundle = new Bundle();
-        bundle.putString(PlayItemLoader.ARG_TYPELIST_LOAD, Folder.ITEMTYPE);
-        return new PlayItemLoader(FolderFragment.this.getContext(), bundle);
+        return new PlayItemLoader(FolderFragment.this.getContext(), args);
     }
 
     @Override
@@ -178,7 +182,7 @@ public class FolderFragment extends Fragment implements LoaderManager.LoaderCall
         }
 
         // Implement Own Methods
-        public void setItemList(List<PlayItem> list) {
+        void setItemList(List<PlayItem> list) {
             m_list = null;
             if (list != null) {
                 m_list = new ArrayList<>();
@@ -192,19 +196,28 @@ public class FolderFragment extends Fragment implements LoaderManager.LoaderCall
     private static class FolderItemViewHolder extends RecyclerView.ViewHolder
             implements View.OnClickListener {
 
-        private TextView txv_folder_name;
+        private TextView txv_folder_name, txv_folder_content_count, txv_folder_duration;
 
         private Folder m_folder_item;
 
-        public FolderItemViewHolder(View itemView) {
+        FolderItemViewHolder(View itemView) {
             super(itemView);
-            txv_folder_name = (TextView) itemView.findViewById(R.id.txv_folder_name);
+            txv_folder_name          = (TextView) itemView.findViewById(R.id.txv_folder_name);
+            txv_folder_content_count = (TextView) itemView.findViewById(R.id.txv_folder_content_count);
+            txv_folder_duration      = (TextView) itemView.findViewById(R.id.txv_folder_duration);
             itemView.setOnClickListener(FolderItemViewHolder.this);
         }
 
-        public void onBindView(PlayItem item) {
+        void onBindView(PlayItem item) {
             m_folder_item = (Folder) item; // Folder extends from PlayItem
             txv_folder_name.setText(item.getDisplayName());
+            txv_folder_content_count.setText(
+                    String.format(
+                            m_resources.getString(R.string.text_files_count),
+                            String.valueOf(item.getContentCount())
+                    )
+            );
+            txv_folder_duration.setText(item.getPlaybackDurationTime());
         }
 
         @Override

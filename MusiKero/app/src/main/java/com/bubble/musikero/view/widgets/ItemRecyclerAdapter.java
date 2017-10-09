@@ -102,8 +102,8 @@ public class ItemRecyclerAdapter
         public void onBindView(PlayItem item/*, int position*/) {
             m_item = item;
             txv_display_item.setText(item.getDisplayName());
-            if (item.getLengLife() != null) {
-                txv_lenglife_item.setText(item.getLengLife());
+            if (item.getPlaybackDurationTime() != null) {
+                txv_lenglife_item.setText(item.getPlaybackDurationTime());
             }
         }
 

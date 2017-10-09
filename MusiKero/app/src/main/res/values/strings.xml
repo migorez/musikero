@@ -42,8 +42,7 @@
     <string name="context_menu_add_to_tail">Añadir a cola</string>
     <string name="context_menu_add_to_playlist">Añadir a lista</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-
+    <string name="text_files_count">%1$s elementos</string>
+    <string name="text_time_playback">%1$s de reproducción</string>
 
 </resources>

@@ -1,6 +1,7 @@
 package com.bubble.musikero.view.pages;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -24,19 +25,16 @@ import java.util.List;
 /**
  * Created by Miguel on 12/09/2017.
  */
-
 public class PlaylistFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<PlayItem>>  {
 
     // ATTRIBUTES
 
     private static final int INSTANCE_LOADER_MANAGER = 0;
 
-    // instancia del widget de la UI para mostrar el listado de objetos tipo Song
-    // https://developer.android.com/guide/topics/ui/layout/recyclerview.html
-    private RecyclerView m_recycler_view;
-
     // implement RecyclerView.Adapter
     private PlaylistRecyclerAdapter m_recycler_adapter;
+
+    private static Resources m_resources;
 
     // CONSTRUCTION
 
@@ -54,9 +52,9 @@ public class PlaylistFragment extends Fragment implements LoaderManager.LoaderCa
     // CONFIG AND INIT
 
     // config view components
-    private void initComponents() {
+    private void initViewComponents(View view) {
         // config form recyclerview
-        m_recycler_view = (RecyclerView) getView().findViewById(R.id.rv_playlist_fragment);
+        final RecyclerView m_recycler_view = (RecyclerView) view.findViewById(R.id.rv_playlist_fragment);
         m_recycler_view.setLayoutManager(new LinearLayoutManager(getContext()));
         // adapter and data of recyclerview
         m_recycler_adapter = new PlaylistRecyclerAdapter();
@@ -73,6 +71,7 @@ public class PlaylistFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        m_resources = getResources();
     }
 
     @Override
@@ -83,7 +82,7 @@ public class PlaylistFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        initComponents();
+        initViewComponents(getView());
         loadRecyclerView();
     }
 
@@ -128,17 +127,17 @@ public class PlaylistFragment extends Fragment implements LoaderManager.LoaderCa
 
     // metodo versatil para la recarga de la lista segun los parametros requeridos
     private void loadRecyclerView() {
+        Bundle bundle_args = new Bundle();
+        bundle_args.putString(PlayItemLoader.ARG_TYPELIST_LOAD, Playlist.ITEMTYPE);
         getLoaderManager().restartLoader // loader instance flag, bundle data, load reacts listener
-                (PlaylistFragment.this.INSTANCE_LOADER_MANAGER, null, PlaylistFragment.this);
+                (INSTANCE_LOADER_MANAGER, bundle_args, PlaylistFragment.this);
     }
 
     // load recyclerview data asyncronously
     @Override
     public Loader<List<PlayItem>> onCreateLoader(int id, Bundle args) {
         // create a new asyncloader that recover the data
-        Bundle bundle = new Bundle();
-        bundle.putString(PlayItemLoader.ARG_TYPELIST_LOAD, Playlist.ITEMTYPE);
-        return new PlayItemLoader(PlaylistFragment.this.getContext(), bundle);
+        return new PlayItemLoader(PlaylistFragment.this.getContext(), args);
     }
 
     @Override
@@ -182,7 +181,7 @@ public class PlaylistFragment extends Fragment implements LoaderManager.LoaderCa
         }
 
         // Implement Own Methods
-        public void setItemList(List<PlayItem> list) {
+        void setItemList(List<PlayItem> list) {
             m_list = null;
             if (list != null) {
                 m_list = new ArrayList<>();
@@ -196,26 +195,33 @@ public class PlaylistFragment extends Fragment implements LoaderManager.LoaderCa
     private static class PlaylistItemViewHolder extends RecyclerView.ViewHolder
             implements View.OnClickListener {
 
-        private TextView txv_playlist_name, txv_playlist_duration;
+        private TextView txv_playlist_name, txv_playlist_content_count, txv_playlist_duration;
 
-        private Playlist m_song_item;
+        private Playlist m_playlist_item;
 
-        public PlaylistItemViewHolder(View itemView) {
+        PlaylistItemViewHolder(View itemView) {
             super(itemView);
-            txv_playlist_name     = (TextView) itemView.findViewById(R.id.txv_playlist_name);
-            txv_playlist_duration = (TextView) itemView.findViewById(R.id.txv_playlist_duration);
+            txv_playlist_name          = (TextView) itemView.findViewById(R.id.txv_playlist_name);
+            txv_playlist_content_count = (TextView) itemView.findViewById(R.id.txv_playlist_content_count);
+            txv_playlist_duration      = (TextView) itemView.findViewById(R.id.txv_playlist_duration);
             itemView.setOnClickListener(PlaylistItemViewHolder.this);
         }
 
-        public void onBindView(PlayItem item) {
-            m_song_item = (Playlist) item; // Song extends from PlayItem
+        void onBindView(PlayItem item) {
+            m_playlist_item = (Playlist) item;
             txv_playlist_name.setText(item.getDisplayName());
-            txv_playlist_duration.setText(item.getLengLife());
+            txv_playlist_content_count.setText(
+                    String.format(
+                            m_resources.getString(R.string.text_files_count),
+                            String.valueOf(item.getContentCount())
+                    )
+            );
+            txv_playlist_duration.setText(item.getPlaybackDurationTime());
         }
 
         @Override
         public void onClick(View view) {
-            Toast.makeText(view.getContext(), "Reproduciendo: " + m_song_item.getDisplayName(),
+            Toast.makeText(view.getContext(), "Reproduciendo: " + m_playlist_item.getDisplayName(),
                     Toast.LENGTH_LONG).show();
         }
     }
