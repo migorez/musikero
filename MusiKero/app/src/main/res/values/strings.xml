@@ -38,9 +38,9 @@
     <string name="context_menu_play">context_menu_play</string>-->
 
     <!-- MENUs -->
-    <string name="context_menu_play_item">Reproducir</string>
-    <string name="context_menu_add_to_tail">Añadir a cola</string>
-    <string name="context_menu_add_to_playlist">Añadir a lista</string>
+    <string name="ctx_menu_play_item">Reproducir</string>
+    <string name="ctx_menu_add_to_tail">Añadir a cola</string>
+    <string name="ctx_menu_add_to_playlist">Añadir a lista</string>
 
     <string name="text_files_count">%1$s elementos</string>
     <string name="text_time_playback">%1$s de reproducción</string>

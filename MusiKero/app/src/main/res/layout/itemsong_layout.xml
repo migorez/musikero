@@ -3,7 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="60sp"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:background="?android:attr/selectableItemBackground">
 
     <FrameLayout
         tools:background="@mipmap/ic_launcher"

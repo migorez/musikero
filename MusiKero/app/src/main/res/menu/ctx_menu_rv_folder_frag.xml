@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.bubble.musikero.view.pages.FolderFragment">
+
+    <item android:id="@+id/op_ctx_menu_play_folder"
+        android:orderInCategory="1"
+        android:title="@string/ctx_menu_play_item"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/op_ctx_menu_folder_add_tail"
+        android:orderInCategory="2"
+        android:title="@string/ctx_menu_add_to_tail"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/op_ctx_menu_folder_add_to_playlist"
+        android:orderInCategory="2"
+        android:title="@string/ctx_menu_add_to_playlist"
+        app:showAsAction="never"/>
+
+</menu>
