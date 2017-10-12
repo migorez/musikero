@@ -12,8 +12,6 @@ import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.widget.Toast;
 
-import com.bubble.musikero.model.structure.PlayItem;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;

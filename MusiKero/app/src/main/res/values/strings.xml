@@ -45,4 +45,7 @@
     <string name="text_files_count">%1$s elementos</string>
     <string name="text_time_playback">%1$s de reproducción</string>
 
+    <!-- labels menu options -->
+    <string name="label_volume_up_option">Subir el Volumen</string>
+
 </resources>

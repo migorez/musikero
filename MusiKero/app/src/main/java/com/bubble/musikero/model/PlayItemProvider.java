@@ -11,10 +11,10 @@ import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.widget.Toast;
 
-import com.bubble.musikero.model.structure.Folder;
-import com.bubble.musikero.model.structure.PlayItem;
-import com.bubble.musikero.model.structure.Playlist;
-import com.bubble.musikero.model.structure.Song;
+import com.bubble.musikero.model.data.Folder;
+import com.bubble.musikero.model.data.PlayItem;
+import com.bubble.musikero.model.data.Playlist;
+import com.bubble.musikero.model.data.Song;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +36,7 @@ public class PlayItemProvider {
      * que alberga el dispositivo.
      */
     @Nullable
-    public static synchronized List<PlayItem> getDeviceSongs(Context context) {
+    public static List<PlayItem> getDeviceSongs(Context context) {
         // handler that helps to show messages to the user from a thread
         UIMessager ui_messager = new UIMessager(context);
         Message msg = ui_messager.obtainMessage();
@@ -125,11 +125,59 @@ public class PlayItemProvider {
         return null;
     }
 
-    /***/
-    /*@Nullable
+    /**
+     *
+     */
+    @Nullable
     static List<PlayItem> getFolderContent(Context context, String folderPath) {
+        // handler that helps to show messages to the user from a thread
+        UIMessager ui_messager = new UIMessager(context);
+        Message msg = ui_messager.obtainMessage();
+        Bundle bundle_msg = new Bundle();
+        //
+        String storage_state = Environment.getExternalStorageState();
+        if (storage_state.equals(Environment.MEDIA_MOUNTED) ||
+                storage_state.equals(Environment.MEDIA_MOUNTED_READ_ONLY)) {
+            // parametros de la consulta al proveedor de contenidos
+            String[] projection = new String[]{
+                    MediaStore.Audio.Media._ID,
+                    MediaStore.Audio.Media.DISPLAY_NAME,
+                    MediaStore.Audio.Media.DATA,
+                    MediaStore.Audio.Media.DURATION
+            };
+            String selection = MediaStore.Audio.Media.DATA + " LIKE ? AND " +
+                    MediaStore.Audio.Media.DISPLAY_NAME + " LIKE ? OR " +
+                    MediaStore.Audio.Media.DISPLAY_NAME + " LIKE ?";
+            String[] selectionArgs = new String[]{folderPath + "%", "%.mp3", "%.wav"};
+            //
+            Cursor cursor = context.getContentResolver().query(
+                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, // la uri hace referencia a un contentprovider que basicamente es un directorio convertido en tabla de datos de su contenido
+                    projection, // las columnas elegidas (select id, name, etc.(cols) from ... - como en sql). null = select * (all)
+                    selection,
+                    selectionArgs,
+                    null);
+            if (cursor != null && cursor.moveToFirst()) { // si definitivamente hay datos
+                List<PlayItem> folderSongList = new ArrayList<>();
+                do {
+                    folderSongList.add(new Song(
+                            cursor.getLong(cursor.getColumnIndex(projection[0])),
+                            cursor.getString(cursor.getColumnIndex(projection[1])),
+                            cursor.getString(cursor.getColumnIndex(projection[2])),
+                            cursor.getLong(cursor.getColumnIndex(projection[3]))
+                    ));
+                } while (cursor.moveToNext());
+                cursor.close();
+                return folderSongList;
+            } else {
+                bundle_msg.putString(KEY_HANDLER_MESSAGE, "No hay contenido en esta carpeta");
+            }
+        } else {
+            bundle_msg.putString(KEY_HANDLER_MESSAGE, "Almacenamiento no disponible.");
+        }
+        msg.setData(bundle_msg);
+        msg.sendToTarget();
         return null;
-    }*/
+    }
 
     @Nullable
     static List<PlayItem> getPlaylists(Context context) {

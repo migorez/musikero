@@ -11,7 +11,7 @@
 
     <!-- tutorial scrolling appbar ->
     https://guides.codepath.com/android/handling-scrolls-with-coordinatorlayout
-    https://mzgreen.github.io/2015/06/23/How-to-hideshow-Toolbar-when-list-is-scrolling(part3)/-->
+    https://mzgreen.github.io/2015/06/23/How-to-hideshow-Toolbar-when-play_item_list-is-scrolling(part3)/-->
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appbar"
         android:layout_width="match_parent"

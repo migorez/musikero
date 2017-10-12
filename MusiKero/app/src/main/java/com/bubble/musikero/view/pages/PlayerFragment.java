@@ -23,7 +23,7 @@ import android.widget.TextView;
 
 import com.bubble.musikero.R;
 import com.bubble.musikero.controlador.Reproduccion.MusicPlayerService;
-import com.bubble.musikero.model.structure.PlayItem;
+import com.bubble.musikero.model.data.PlayItem;
 
 import java.util.List;
 

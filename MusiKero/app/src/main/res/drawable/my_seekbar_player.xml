@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--http://android-morefast.blogspot.com.co/2017/04/como-utilizar-y-disenar-un-seekbar-en.html
 http://andygardenforever.blogspot.com.co/2014/04/create-your-own-custom-seek-bar-with.html-->
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+<layer-play_item_list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@android:id/background">
         <shape android:shape="rectangle">
             <solid android:color="#b1bbe8"></solid>
@@ -16,4 +16,4 @@ http://andygardenforever.blogspot.com.co/2014/04/create-your-own-custom-seek-bar
             </shape>
         </clip>
     </item>
-</layer-list>
+</layer-play_item_list>

@@ -37,14 +37,87 @@ public class MainActivity extends AppCompatActivity {
     private ViewPager viewPager;
 
     // OFFERED INTERFACE
-    public interface OnKeyDownPressed {
+    private OnActivityInteractionListener m_interaction_listener;
+    public interface OnActivityInteractionListener {
         void onKeyBackPressed();
     }
-    private OnKeyDownPressed m_fragment_listener;
 
-    // Construction
+    // INNER CLASS
 
-    private void init(){
+    /**
+     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
+     * one of the sections/tabs/pages.
+     * Clase interna privada pues no necesita ser utilzada en ninguna otra parte
+     *
+     */
+    private class PlayFragmentsAdapter extends FragmentPagerAdapter {
+
+        /**
+         * Esta requiere de una instancia del FragmentManager que es la clase de la API de Android
+         * que permite la interaccion con fragmentos, en este caso con los que utilizaremos en
+         * nuestra aplicacion. A esta se puede acceder desde la instancia de una actividad, puesto
+         * que justamente el fragmento es para añadirse sobre una actividad.
+         * Un fragmento no puede ser usado aparte de una actividad
+         * refs = https://developer.android.com/reference/android/app/Fragment.html
+         * https://developer.android.com/guide/components/fragments.html
+         */
+        PlayFragmentsAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            switch (position) {
+                case 0:
+                    SongFragment songFragment = SongFragment.newInstance();
+                    //m_interaction_listener = songFragment;
+                    return songFragment;
+                case 1:
+                    FolderFragment folderFragment = FolderFragment.newInstance();
+                    m_interaction_listener = folderFragment;
+                    return folderFragment;
+                case 2:
+                    PlaylistFragment playlistFragment = PlaylistFragment.newInstance();
+                    //m_interaction_listener = playlistFragment;
+                    return playlistFragment;
+                default:
+                    return null;
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return 3;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            switch (position) {
+                case 0:
+                    return getResources().getString(R.string.label_tab_songs);
+                case 1:
+                    return getResources().getString(R.string.label_tab_folders);
+                case 2:
+                    return getResources().getString(R.string.label_tab_playlists);
+                /*case 3:
+                    return getResources().getString(R.string.label_tab_player);*/
+            }
+            return null;
+        }
+
+        // SLIDING PANE
+        // refs -> https://www.numetriclabz.com/implementation-of-sliding-up-panel-using-androidslidinguppanel-in-android-tutorial/
+        // https://www.google.com.co/search?q=sliding+up+panel+android+example&oq=sliding+up+&gs_l=psy-ab.3.2.0j0i22i30k1l3.32149.32655.0.34932.3.3.0.0.0.0.186.533.0j3.3.0....0...1.1.64.psy-ab..0.3.532....0.FMCSb4YClAc
+        // http://www.devexchanges.info/2015/05/making-sliding-up-panel-like-google.html
+    }
+
+    // Activity Life
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main_activity_layout);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         // Create the adapter that will return a fragment for each of the three
@@ -57,15 +130,7 @@ public class MainActivity extends AppCompatActivity {
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
-    }
 
-    // Activity Life
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.main_activity_layout);
-        init();
     }
 
     @Override
@@ -81,73 +146,13 @@ public class MainActivity extends AppCompatActivity {
         // fisicos del dispositivo. Si es accionada la tecla de retroceso se enviara el evento
         // para ser repondido por el fragmento que implemente la interfaz.
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (m_fragment_listener != null) {
-                m_fragment_listener.onKeyBackPressed();
+            if (m_interaction_listener != null) {
+                m_interaction_listener.onKeyBackPressed();
                 return true;
             }
         }
         // En cualquier caso se respondera normalmente a la accion sobre los controles que no nos importan.
         return super.onKeyDown(keyCode, event);
-    }
-
-    // INNER CLASS
-
-    /**
-     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
-     * one of the sections/tabs/pages.
-     * Clase interna privada pues no necesita ser utilzada en ninguna otra parte
-     *
-     */
-    private class PlayFragmentsAdapter extends FragmentPagerAdapter {
-
-        // Fragmentos desplegados
-        private final Fragment[] fragments = new Fragment[]{
-                SongFragment.newInstance(),
-                FolderFragment.newInstance(),
-                PlaylistFragment.newInstance(),
-                PlayerFragment.newInstance()
-        };
-
-        /* Esta requiere de una instancia del FragmentManager que es la clase de la API de Android
-         * que permite la interaccion con fragmentos, en este caso con los que utilizaremos en
-         * nuestra aplicacion. A esta se puede acceder desde la instancia de una actividad, puesto
-         * que justamente el fragmento es para añadirse sobre una actividad.
-         * Un fragmento no puede ser usado aparte de una actividad
-         * refs = https://developer.android.com/reference/android/app/Fragment.html
-         * https://developer.android.com/guide/components/fragments.html*/
-        public PlayFragmentsAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            return fragments[position];
-        }
-
-        @Override
-        public int getCount() {
-            return fragments.length;
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            switch (position) {
-                case 0:
-                    return getResources().getString(R.string.label_tab_songs);
-                case 1:
-                    return getResources().getString(R.string.label_tab_folders);
-                case 2:
-                    return getResources().getString(R.string.label_tab_playlists);
-                case 3:
-                    return getResources().getString(R.string.label_tab_player);
-            }
-            return null;
-        }
-
-        // SLIDING PANE
-        // refs -> https://www.numetriclabz.com/implementation-of-sliding-up-panel-using-androidslidinguppanel-in-android-tutorial/
-        // https://www.google.com.co/search?q=sliding+up+panel+android+example&oq=sliding+up+&gs_l=psy-ab.3.2.0j0i22i30k1l3.32149.32655.0.34932.3.3.0.0.0.0.186.533.0j3.3.0....0...1.1.64.psy-ab..0.3.532....0.FMCSb4YClAc
-        // http://www.devexchanges.info/2015/05/making-sliding-up-panel-like-google.html
     }
 
     // MENU
@@ -167,9 +172,9 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        /*if (id == R.id.action_settings) {
             return true;
-        }
+        }*/
 
         return super.onOptionsItemSelected(item);
     }
