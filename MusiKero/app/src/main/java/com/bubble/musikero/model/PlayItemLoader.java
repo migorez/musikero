@@ -1,7 +1,6 @@
 package com.bubble.musikero.model;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.support.v4.content.AsyncTaskLoader;
 
 import com.bubble.musikero.model.data.Folder;
@@ -47,7 +46,7 @@ public class PlayItemLoader extends AsyncTaskLoader<List<PlayItem>> {
                 return PlayItemProvider.getDeviceSongs(getContext());
             case Folder.ITEMTYPE:
                 if (folderPathLoad != null) {
-                    return PlayItemProvider.getFolderContent(getContext(), folderPathLoad);
+                    return PlayItemProvider.getFolderSongs(getContext(), folderPathLoad);
                 }
                 return PlayItemProvider.getPlayFolders(getContext());
             case Playlist.ITEMTYPE:

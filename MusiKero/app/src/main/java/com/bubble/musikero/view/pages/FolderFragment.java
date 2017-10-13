@@ -14,7 +14,8 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.bubble.musikero.R;
-import com.bubble.musikero.controlador.Reproduccion.MusicPlayerService;
+import com.bubble.musikero.controlador.player.MusicPlayerService;
+import com.bubble.musikero.controlador.player.MusicPlayerServiceB;
 import com.bubble.musikero.model.PlayItemLoader;
 import com.bubble.musikero.model.data.Folder;
 import com.bubble.musikero.model.data.PlayItem;
@@ -161,20 +162,33 @@ public class FolderFragment extends Fragment implements LoaderManager.LoaderCall
     public void onPlayItemClick(PlayItem play_item) {
         if (play_item.getItemType() == Folder.ITEMTYPE) {
             m_playItemLoader.reloadData(Folder.ITEMTYPE, ((Folder) play_item).getPath());
-
         } else if(play_item.getItemType() == Song.ITEMTYPE) {
             getActivity().startService(new Intent(
-                    MusicPlayerService.ACTION_PLAY,
+                    MusicPlayerServiceB.ACTION_PLAY,
                     ((Song) play_item).getUri(),
                     getContext(),
-                    MusicPlayerService.class
+                    MusicPlayerServiceB.class
             ));
         }
     }
 
     @Override
     public void onPlayItemLongClick(PlayItem play_item) {
-        Toast.makeText(getContext(), "Sapo Hijueputa LongClick en " + play_item.getDisplayName(),
+        if (play_item.getItemType() == Folder.ITEMTYPE) {
+            Bundle bundle = new Bundle();
+            bundle.putString( // bundle with the folder path for its songs
+                    MusicPlayerService.EXTRA_KEY_FOLDER_PATH_TO_PLAY,
+                    ((Folder) play_item).getPath()
+            );
+            Intent playFolderIntent = new Intent(
+                    MusicPlayerService.ACTION_PLAY,
+                    null, // data null
+                    getContext(),
+                    MusicPlayerService.class);
+            playFolderIntent.putExtras(bundle);
+            getActivity().startService(playFolderIntent);
+        }
+        Toast.makeText(getContext(), "LongClick en " + play_item.getDisplayName(),
                 Toast.LENGTH_SHORT).show();
     }
 

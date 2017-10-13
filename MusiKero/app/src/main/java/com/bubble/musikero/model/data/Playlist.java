@@ -8,6 +8,9 @@ import android.widget.TextView;
 
 import com.bubble.musikero.R;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -16,6 +19,16 @@ import java.util.Locale;
 public class Playlist extends PlayItem {
 
     public static final int ITEMTYPE = 2;
+
+    public static final List<Playlist> DEFAULT_PLAYLISTS = Collections.unmodifiableList(
+            new ArrayList<Playlist>() {
+                {
+                    add(new Playlist(0, "selección"));
+                    add(new Playlist(1, "todo"));
+                    add(new Playlist(2, "cola"));
+                }
+            }
+    );
 
     private long m_id;
     private String m_name;

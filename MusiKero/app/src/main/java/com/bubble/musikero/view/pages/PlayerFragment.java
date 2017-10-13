@@ -22,7 +22,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.bubble.musikero.R;
-import com.bubble.musikero.controlador.Reproduccion.MusicPlayerService;
+import com.bubble.musikero.controlador.player.MusicPlayerServiceB;
 import com.bubble.musikero.model.data.PlayItem;
 
 import java.util.List;
@@ -47,7 +47,7 @@ public class PlayerFragment extends Fragment implements View.OnClickListener,
     private OnFragmentInteractionListener mListener;
 
     private VinculadorServicio m_vinculador_servicio;
-    private MusicPlayerService m_music_service_instance;
+    private MusicPlayerServiceB m_music_service_instance;
     private boolean m_servicio_vinculado;
 
     private MediaPlayer service_media_player;
@@ -194,7 +194,7 @@ public class PlayerFragment extends Fragment implements View.OnClickListener,
         // refs => https://stackoverflow.com/questions/6255965/android-media-player-seekbar
         // how bind a service => https://stackoverflow.com/questions/40024139/which-context-to-call-startservice
         getActivity().bindService(
-                new Intent(getContext(), MusicPlayerService.class),
+                new Intent(getContext(), MusicPlayerServiceB.class),
                 m_vinculador_servicio,
                 0 // flag of bind. if 1 start the services if this not exist, 0 dont do anything.
         );
@@ -290,27 +290,27 @@ public class PlayerFragment extends Fragment implements View.OnClickListener,
         switch (v.getId()) {
             case R.id.w_btn_play_pause:
                 /*Intent intent = new Intent(
-                        MusicPlayerService.ACTION_PLAY,
+                        MusicPlayerServiceB.ACTION_PLAY,
                         null,
                         getContext(),
-                        MusicPlayerService.class
+                        MusicPlayerServiceB.class
                 );
                 int pos_item_sel =
                         spinner_play_list.getSelectedItemPosition() == AdapterView.INVALID_POSITION ?
                         0 : spinner_play_list.getSelectedItemPosition();
-                intent.putExtra(MusicPlayerService.ARG_PLAYLIST_ID,
+                intent.putExtra(MusicPlayerServiceB.ARG_PLAYLIST_ID,
                         m_spinner_playlist_adapter.getItem(pos_item_sel).getPlaylist().getId()
                 );
                 getActivity().startService(intent);*/
                 break;
             case R.id.w_btn_next:
-                getActivity().startService(new Intent(MusicPlayerService.ACTION_NEXT));
+                getActivity().startService(new Intent(MusicPlayerServiceB.ACTION_NEXT));
                 break;
             case R.id.w_btn_prev:
-                getActivity().startService(new Intent(MusicPlayerService.ACTION_PREV));
+                getActivity().startService(new Intent(MusicPlayerServiceB.ACTION_PREV));
                 break;
             case R.id.w_btn_stop:
-                getActivity().startService(new Intent(MusicPlayerService.ACTION_STOP));
+                getActivity().startService(new Intent(MusicPlayerServiceB.ACTION_STOP));
                 break;
             default:
         }
@@ -344,7 +344,7 @@ public class PlayerFragment extends Fragment implements View.OnClickListener,
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            MusicPlayerService.Conector conector = (MusicPlayerService.Conector) service;
+            MusicPlayerServiceB.Conector conector = (MusicPlayerServiceB.Conector) service;
             m_music_service_instance = conector.getMusicService();
             m_servicio_vinculado = m_music_service_instance != null ? true : false;
         }

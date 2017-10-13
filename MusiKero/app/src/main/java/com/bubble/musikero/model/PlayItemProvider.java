@@ -92,7 +92,7 @@ public class PlayItemProvider {
      * Static void that give us the list of folders of reproducible device's files.
      */
     @Nullable
-    static List<PlayItem> getPlayFolders(Context context) {
+    public static List<PlayItem> getPlayFolders(Context context) {
         List<PlayItem> device_songs = getDeviceSongs(context);
         if (device_songs != null) {
             List<PlayItem> play_folders = new ArrayList<>();
@@ -129,7 +129,7 @@ public class PlayItemProvider {
      *
      */
     @Nullable
-    static List<PlayItem> getFolderContent(Context context, String folderPath) {
+    public static List<PlayItem> getFolderSongs(Context context, String folderPath) {
         // handler that helps to show messages to the user from a thread
         UIMessager ui_messager = new UIMessager(context);
         Message msg = ui_messager.obtainMessage();
@@ -159,7 +159,8 @@ public class PlayItemProvider {
             if (cursor != null && cursor.moveToFirst()) { // si definitivamente hay datos
                 List<PlayItem> folderSongList = new ArrayList<>();
                 do {
-                    folderSongList.add(new Song(
+                    folderSongList.add(
+                            new Song(
                             cursor.getLong(cursor.getColumnIndex(projection[0])),
                             cursor.getString(cursor.getColumnIndex(projection[1])),
                             cursor.getString(cursor.getColumnIndex(projection[2])),
@@ -180,7 +181,7 @@ public class PlayItemProvider {
     }
 
     @Nullable
-    static List<PlayItem> getPlaylists(Context context) {
+    public static List<PlayItem> getPlaylists(Context context) {
         // handler that helps to show messages to the user from a thread
         UIMessager ui_messager = new UIMessager(context);
         Message msg = ui_messager.obtainMessage();
@@ -223,7 +224,7 @@ public class PlayItemProvider {
     /**
      * */
     @Nullable
-    static List<PlayItem> getPlaylistContent(Context context, long playlist_id) {
+    public static List<PlayItem> getPlaylistSongs(Context context, long playlist_id) {
         // handler that helps to show messages to the user from a thread
         UIMessager ui_messager = new UIMessager(context);
         Message msg = ui_messager.obtainMessage();
@@ -247,7 +248,8 @@ public class PlayItemProvider {
             if (cursor != null && cursor.moveToFirst()) {
                 List<PlayItem> playlist_content = new ArrayList<>();
                 do {
-                    playlist_content.add(new Song(
+                    playlist_content.add(
+                            new Song(
                             cursor.getLong(cursor.getColumnIndex(projection[0])),
                             cursor.getString(cursor.getColumnIndex(projection[1])),
                             cursor.getString(cursor.getColumnIndex(projection[2])),

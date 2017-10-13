@@ -2,10 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bubble.musikero">
 
-    <uses-sdk
-        android:minSdkVersion="15"
-        android:targetSdkVersion="15" />
-
     <!--
      Requerida por el metodo setWakeLock de nuestro objeto MediaPlayer. Este otorga el permiso
      de permitir apagar la pantalla del dispositivo y seguir utilizando el procesador
@@ -33,12 +29,26 @@
         </activity>
 
         <service
-            android:name=".controlador.Reproduccion.MusicPlayerService"
+            android:name=".controlador.player.MusicPlayerServiceB"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.bubble.musikero.action.PLAY" />
                 <action android:name="com.bubble.musikero.action.STOP" />
                 <action android:name="com.bubble.musikero.action.PAUSE" />
+                <action android:name="com.bubble.musikero.action.NEXT" />
+                <action android:name="com.bubble.musikero.action.PREV" />
+                <action android:name="com.bubble.musikero.action.ADDTAIL" />
+                <action android:name="com.bubble.musikero.action.PLAYALL" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".controlador.player.MusicPlayerService"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.bubble.musikero.action.PLAY" />
+                <action android:name="com.bubble.musikero.action.STOP" />
+                <action android:name="com.bubble.musikero.action.PLAY_PAUSE" />
                 <action android:name="com.bubble.musikero.action.NEXT" />
                 <action android:name="com.bubble.musikero.action.PREV" />
                 <action android:name="com.bubble.musikero.action.ADDTAIL" />

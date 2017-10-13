@@ -1,4 +1,4 @@
-package com.bubble.musikero.controlador.Reproduccion;
+package com.bubble.musikero.controlador.player;
 
 import android.app.Service;
 import android.content.Context;
@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MusicPlayerService extends Service implements MediaPlayer.OnPreparedListener,
+public class MusicPlayerServiceB extends Service implements MediaPlayer.OnPreparedListener,
         MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener,
         AudioManager.OnAudioFocusChangeListener {
 
@@ -283,7 +283,7 @@ public class MusicPlayerService extends Service implements MediaPlayer.OnPrepare
         if (m_player != null && m_playing_state != PlayingState.Stopped && leaveAudioFocus()) {
             liberarRecursos(true);
             m_playing_state = PlayingState.Stopped;
-            MusicPlayerService.this.stopSelf();
+            MusicPlayerServiceB.this.stopSelf();
         }
     }
 
@@ -326,8 +326,8 @@ public class MusicPlayerService extends Service implements MediaPlayer.OnPrepare
             super();
         }
 
-        public MusicPlayerService getMusicService() {
-            return MusicPlayerService.this;
+        public MusicPlayerServiceB getMusicService() {
+            return MusicPlayerServiceB.this;
         }
     }
 
