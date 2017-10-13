@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -27,14 +28,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class MusicPlayerService extends Service implements
+public class MusicService extends Service implements
         MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener,
         MediaPlayer.OnCompletionListener, AudioManager.OnAudioFocusChangeListener,
         Loader.OnLoadCompleteListener<List<Song>>, Loader.OnLoadCanceledListener<List<Song>> {
 
     // ATTRIBUTES
 
-    private static final String TAG = "MusicPlayerService";
+    private static final String TAG = "MusicService";
 
     // actions constants
     public static final String ACTION_PLAY       = "com.bubble.musikero.action.PLAY";
@@ -45,14 +46,16 @@ public class MusicPlayerService extends Service implements
     public static final String ACTION_ADDTAIL    = "com.bubble.musikero.action.ADDTAIL";
     public static final String ACTION_PLAYALL    = "com.bubble.musikero.action.PLAYALL";
 
-    // params
-    public static final String EXTRA_KEY_FOLDER_PATH_TO_PLAY = "_folder_path_to_play";
-    public static final String EXTRA_KEY_PLAYLIST_ID_TO_PLAY = "_playlist_id_to_play";
-    private static final int NO_PLAYBACK_LIST_ARG = -1;
+    // params and constants
+    public static final String  EXTRA_KEY_FOLDER_PATH_TO_PLAY = "_folder_path_to_play";
+    public static final String  EXTRA_KEY_PLAYLIST_ID_TO_PLAY = "_playlist_id_to_play";
+    private static final int    NO_PLAYBACK_LIST_ARG          = -1;
 
-    private static final float AUDIO_FOCUS_DUCK_VOLUME = 0.1f;
+    private static final float  AUDIO_FOCUS_DUCK_VOLUME       = 0.1f;
 
-    private static final int NOTIFICATION_ID = 1;
+    private static final int    NOTIFICATION_ID               = 1;
+
+    private final IBinder       m_musicServiceBinder;/* = new MusicServiceBinder()*/
 
     // fields
     /**
@@ -69,13 +72,13 @@ public class MusicPlayerService extends Service implements
     private Notification m_notification;
     private NotificationManagerCompat m_notificationManagerCompat;
 
-    // classes
+    // inner class
 
-    private AudioFocus m_audioFocus;
+    private AudioFocusState m_audioFocusState;
     /**
      *
      */
-    private enum AudioFocus {
+    private enum AudioFocusState {
         Focused,
         NoFocusCanDuck,
         NoFocusNoDuck
@@ -213,20 +216,6 @@ public class MusicPlayerService extends Service implements
             forceLoad();
         }
 
-        /**
-         *
-         */
-        /*private List<Song> getSongsUris(List<Song> songs) {
-            if (songs != null) {
-                List<Uri> uris = new ArrayList<>();
-                for (Song song : songs) {
-                    uris.add(song.getUri());
-                }
-                return uris;
-            }
-            return null;
-        }*/
-
         @Override
         protected void onStartLoading() {
             forceLoad();
@@ -254,7 +243,8 @@ public class MusicPlayerService extends Service implements
 
     // CONSTRUCT
 
-    public MusicPlayerService() {
+    public MusicService() {
+        m_musicServiceBinder = new MusicServiceBinder();
     }
 
     // LIFECYCLE
@@ -265,7 +255,7 @@ public class MusicPlayerService extends Service implements
         m_audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
         m_playBackListLoader = new PlayBackListLoader(getApplicationContext());
         m_playBackListLoader.registerListener(0, this);
-        m_audioFocus = AudioFocus.NoFocusNoDuck;
+        m_audioFocusState = AudioFocusState.NoFocusNoDuck;
         m_playbackState = PlaybackState.Stopped;
     }
 
@@ -325,18 +315,18 @@ public class MusicPlayerService extends Service implements
      *
      */
     private void startMediaPlayer() {
-        if (m_audioFocus == AudioFocus.NoFocusNoDuck) {
+        if (m_audioFocusState == AudioFocusState.NoFocusNoDuck) {
             if (m_mediaPlayer.isPlaying()) {
                 m_mediaPlayer.pause();
                 m_playbackState = PlaybackState.Paused;
             }
         } else {
-            if (m_audioFocus == AudioFocus.NoFocusCanDuck) {
+            if (m_audioFocusState == AudioFocusState.NoFocusCanDuck) {
                 // setVolume recibe dos valores float para un audio estereo, izq y der
                 // we'll be relatively quiet
                 m_mediaPlayer.setVolume(AUDIO_FOCUS_DUCK_VOLUME, AUDIO_FOCUS_DUCK_VOLUME);
             } else {
-                m_mediaPlayer.setVolume(1.0f, 1.0f); // we can be loud / podemos ser ruidosos
+                m_mediaPlayer.setVolume(2.0f, 2.0f); // we can be loud / podemos ser ruidosos
             }
             if (!m_mediaPlayer.isPlaying()) {
                 m_mediaPlayer.start();
@@ -353,7 +343,6 @@ public class MusicPlayerService extends Service implements
         // al recien pedir el foco no se ejecuta el listener, solo se registra para que responda al
         // dispositivo.
         if (getAudioFocus()) {
-            // from Song item or PlayerFragment the bundle will be null
             if (uri != null) { // just Song give me an uri
                 actionNext(uri);
             } else if (bundle != null) {
@@ -401,7 +390,7 @@ public class MusicPlayerService extends Service implements
     }
 
     /**
-     * At change the playlist in the PlayerFragment, the Loader load the new PlaybackList, and in
+     * At change the playlist in the player controller, the Loader load the new PlaybackList, and in
      * this method is accessed the next item.
      */
     private void actionNext(Uri uri) {
@@ -464,11 +453,11 @@ public class MusicPlayerService extends Service implements
      *
      */
     private boolean getAudioFocus() {
-        if (m_audioFocus != AudioFocus.Focused) {
+        if (m_audioFocusState != AudioFocusState.Focused) {
             if (m_audioManager.requestAudioFocus
                     (this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN) ==
                     AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-                m_audioFocus = AudioFocus.Focused;
+                m_audioFocusState = AudioFocusState.Focused;
                 return true;
             }
             return false;
@@ -492,7 +481,8 @@ public class MusicPlayerService extends Service implements
         PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0,
                 new Intent(getApplicationContext(), MainActivity.class),
                 PendingIntent.FLAG_UPDATE_CURRENT);
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(getApplicationContext())
+        NotificationCompat.Builder notificationBuilder =
+                new NotificationCompat.Builder(getApplicationContext())
                 .setContentIntent(pendingIntent)
                 .setTicker(tickerText)
                 .setContentTitle("Musikero")
@@ -518,14 +508,14 @@ public class MusicPlayerService extends Service implements
     public void onAudioFocusChange(int focusChange) {
         switch (focusChange) {
             case AudioManager.AUDIOFOCUS_GAIN:
-                m_audioFocus = AudioFocus.Focused;
+                m_audioFocusState = AudioFocusState.Focused;
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-                m_audioFocus = AudioFocus.NoFocusCanDuck;
+                m_audioFocusState = AudioFocusState.NoFocusCanDuck;
                 break;
             case AudioManager.AUDIOFOCUS_LOSS:
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-                m_audioFocus = AudioFocus.NoFocusNoDuck;
+                m_audioFocusState = AudioFocusState.NoFocusNoDuck;
                 break;
             default:
                 break;
@@ -568,10 +558,23 @@ public class MusicPlayerService extends Service implements
 
     // BINDER METHODS
 
+    /**
+     * Class used for the client Binder.  Because we know this service always
+     * runs in the same process as its clients, we don't need to deal with IPC.
+     */
+    public class MusicServiceBinder extends Binder {
+
+        MusicServiceBinder() {}
+
+        public MusicService getMusicService() {
+            return MusicService.this;
+        }
+
+    }
+
     @Override
     public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
+        return m_musicServiceBinder;
     }
 
 }

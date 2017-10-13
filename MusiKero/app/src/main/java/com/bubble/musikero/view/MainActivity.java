@@ -1,5 +1,6 @@
 package com.bubble.musikero.view;
 
+import android.content.Intent;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -14,12 +15,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.bubble.musikero.R;
+import com.bubble.musikero.controlador.player.MusicService;
 import com.bubble.musikero.view.pages.FolderFragment;
-import com.bubble.musikero.view.pages.PlayerFragment;
 import com.bubble.musikero.view.pages.PlaylistFragment;
 import com.bubble.musikero.view.pages.SongFragment;
 
 public class MainActivity extends AppCompatActivity {
+
+    // bind service
+    private MusicService m_musicService;
+    private Intent       m_musicServiceIntent;
+    private boolean      bindedService;
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide

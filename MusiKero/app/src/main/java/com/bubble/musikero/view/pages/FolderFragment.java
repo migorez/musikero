@@ -14,8 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.bubble.musikero.R;
-import com.bubble.musikero.controlador.player.MusicPlayerService;
-import com.bubble.musikero.controlador.player.MusicPlayerServiceB;
+import com.bubble.musikero.controlador.player.MusicService;
 import com.bubble.musikero.model.PlayItemLoader;
 import com.bubble.musikero.model.data.Folder;
 import com.bubble.musikero.model.data.PlayItem;
@@ -164,10 +163,10 @@ public class FolderFragment extends Fragment implements LoaderManager.LoaderCall
             m_playItemLoader.reloadData(Folder.ITEMTYPE, ((Folder) play_item).getPath());
         } else if(play_item.getItemType() == Song.ITEMTYPE) {
             getActivity().startService(new Intent(
-                    MusicPlayerServiceB.ACTION_PLAY,
+                    MusicService.ACTION_PLAY,
                     ((Song) play_item).getUri(),
                     getContext(),
-                    MusicPlayerServiceB.class
+                    MusicService.class
             ));
         }
     }
@@ -177,14 +176,14 @@ public class FolderFragment extends Fragment implements LoaderManager.LoaderCall
         if (play_item.getItemType() == Folder.ITEMTYPE) {
             Bundle bundle = new Bundle();
             bundle.putString( // bundle with the folder path for its songs
-                    MusicPlayerService.EXTRA_KEY_FOLDER_PATH_TO_PLAY,
+                    MusicService.EXTRA_KEY_FOLDER_PATH_TO_PLAY,
                     ((Folder) play_item).getPath()
             );
             Intent playFolderIntent = new Intent(
-                    MusicPlayerService.ACTION_PLAY,
+                    MusicService.ACTION_PLAY,
                     null, // data null
                     getContext(),
-                    MusicPlayerService.class);
+                    MusicService.class);
             playFolderIntent.putExtras(bundle);
             getActivity().startService(playFolderIntent);
         }

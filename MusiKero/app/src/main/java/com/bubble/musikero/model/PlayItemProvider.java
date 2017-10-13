@@ -211,7 +211,8 @@ public class PlayItemProvider {
                 cursor.close();
                 return playlists;
             } else {
-                bundle_msg.putString(KEY_HANDLER_MESSAGE, "No existen listas de reproducción guardadas.");
+                bundle_msg.putString(KEY_HANDLER_MESSAGE,
+                        "No existen listas de reproducción guardadas.");
             }
         } else {
             bundle_msg.putString(KEY_HANDLER_MESSAGE, "Almacenamiento no disponible.");

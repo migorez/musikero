@@ -13,7 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.bubble.musikero.R;
-import com.bubble.musikero.controlador.player.MusicPlayerServiceB;
+import com.bubble.musikero.controlador.player.MusicService;
 import com.bubble.musikero.model.PlayItemLoader;
 import com.bubble.musikero.model.data.PlayItem;
 import com.bubble.musikero.model.data.Song;
@@ -146,10 +146,10 @@ public class SongFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onPlayItemClick(PlayItem play_item) {
         getActivity().startService(new Intent(
-                MusicPlayerServiceB.ACTION_PLAY,
+                MusicService.ACTION_PLAY,
                 ((Song) play_item).getUri(),
                 getContext(),
-                MusicPlayerServiceB.class
+                MusicService.class
         ));
     }
 
