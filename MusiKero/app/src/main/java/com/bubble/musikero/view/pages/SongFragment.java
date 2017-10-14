@@ -1,10 +1,7 @@
 package com.bubble.musikero.view.pages;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,33 +10,21 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.bubble.musikero.R;
-import com.bubble.musikero.controlador.player.MusicService;
-import com.bubble.musikero.model.PlayItemLoader;
 import com.bubble.musikero.model.data.PlayItem;
 import com.bubble.musikero.model.data.Song;
-import com.bubble.musikero.model.widgets.PlayItemRecyclerAdapter;
-import com.bubble.musikero.model.widgets.PlayItemViewHolder;
-import com.bubble.musikero.view.MainActivity;
+import com.bubble.musikero.model.widgets.PlayItemFragment;
 
 import java.util.List;
 
 /**
  * Created by Miguel on 05/09/2017.
  */
-public class SongFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<PlayItem>>,
-        PlayItemViewHolder.OnPlayItemViewHolderClickListener,
-        MainActivity.OnActivityInteractionListener {
-
-    // ATTRIBUTES
-
-    // implement RecyclerView.Adapter
-    private PlayItemRecyclerAdapter m_play_item_recycler_adapter;
-
-    private PlayItemLoader m_playItemLoader;
+public class SongFragment extends PlayItemFragment {
 
     // CONSTRUCTION
 
     public SongFragment() {
+        super("Songs");
         // Required empty public constructor for method newInstance
     }
 
@@ -65,17 +50,13 @@ public class SongFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View songFragmentView = inflater.inflate(R.layout.song_fragment, container, false);
-
         // config form recyclerview
         // instancia del widget de la UI para mostrar el listado de objetos tipo Song
         // https://developer.android.com/guide/topics/ui/layout/recyclerview.html
         RecyclerView m_recycler_view = (RecyclerView) songFragmentView.findViewById(R.id.rv_song_fragment);
         m_recycler_view.setLayoutManager(new LinearLayoutManager(getContext()));
-
         // adapter and data of recyclerview
-        m_play_item_recycler_adapter = new PlayItemRecyclerAdapter(this);
-        m_recycler_view.setAdapter(m_play_item_recycler_adapter);
-
+        m_recycler_view.setAdapter(m_playItemListAdapter);
         return songFragmentView;
     }
 
@@ -87,8 +68,6 @@ public class SongFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onStart() {
         super.onStart();
-        m_playItemLoader = (PlayItemLoader) getLoaderManager().restartLoader // loader instance flag, bundle data, load reacts listener
-                (PlayItemLoader.ARG_ONLY_INSTANCE_LOADER, null, this);
         m_playItemLoader.reloadData(Song.ITEMTYPE, null);
     }
 
@@ -126,41 +105,35 @@ public class SongFragment extends Fragment implements LoaderManager.LoaderCallba
 
     // IMPLEMENTS METHODS AND INTERFACES
 
+    @Override
+    public String getTabTitle() {
+        return m_tabTitle;
+    }
+
     // load recyclerview data asyncronously
     @Override
-    public Loader<List<PlayItem>> onCreateLoader(int id, Bundle args) {
-        // create a new asyncloader that recover the data
-        return new PlayItemLoader(getContext());
+    public void onLoadCanceled(Loader<List<PlayItem>> loader) {
+        m_playItemListAdapter.setItems(null);
     }
 
     @Override
-    public void onLoadFinished(Loader<List<PlayItem>> loader, List<PlayItem> data) {
-        m_play_item_recycler_adapter.setItems(data);
+    public void onLoadComplete(Loader<List<PlayItem>> loader, List<PlayItem> data) {
+        if (data != null)
+            m_playItemListAdapter.setItems(data);
     }
 
     @Override
-    public void onLoaderReset(Loader<List<PlayItem>> loader) {
-        m_play_item_recycler_adapter.setItems(null);
+    public void onPlayItemClick(PlayItem playItem) {
+        if (m_playItemCallbacks != null) {
+            m_playItemCallbacks.onPlayItemPlaySelected(playItem);
+        }
     }
 
     @Override
-    public void onPlayItemClick(PlayItem play_item) {
-        getActivity().startService(new Intent(
-                MusicService.ACTION_PLAY,
-                ((Song) play_item).getUri(),
-                getContext(),
-                MusicService.class
-        ));
-    }
-
-    @Override
-    public void onPlayItemLongClick(PlayItem play_item) {
-
-    }
-
-    @Override
-    public void onKeyBackPressed() {
-
+    public void onPlayItemLongClick(PlayItem playItem) {
+        if (m_playItemCallbacks != null) {
+            m_playItemCallbacks.onPlayItemPlaySelected(playItem);
+        }
     }
 
 }

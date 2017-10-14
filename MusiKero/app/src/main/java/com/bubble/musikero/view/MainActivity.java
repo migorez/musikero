@@ -1,6 +1,10 @@
 package com.bubble.musikero.view;
 
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.Handler;
+import android.os.IBinder;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -13,40 +17,51 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.Toast;
 
 import com.bubble.musikero.R;
+import com.bubble.musikero.controlador.player.MusicPlayerController;
 import com.bubble.musikero.controlador.player.MusicService;
+import com.bubble.musikero.model.data.Folder;
+import com.bubble.musikero.model.data.PlayItem;
+import com.bubble.musikero.model.data.Playlist;
+import com.bubble.musikero.model.data.Song;
+import com.bubble.musikero.model.widgets.PlayItemFragment;
 import com.bubble.musikero.view.pages.FolderFragment;
 import com.bubble.musikero.view.pages.PlaylistFragment;
 import com.bubble.musikero.view.pages.SongFragment;
 
-public class MainActivity extends AppCompatActivity {
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-    // bind service
+public class MainActivity extends AppCompatActivity implements
+        PlayItemFragment.PlayItemFragmentCallbacks {
+
+    // ATTRIBUTES AND CONSTANTS
+
+    private static final int mBIND_NOT_CREATE = 0;
+
+    private static final List<PlayItemFragment> PLAYITEM_PAGES = Collections.unmodifiableList(
+            new ArrayList<PlayItemFragment>(){
+                {
+                    add(SongFragment.newInstance());
+                    add(FolderFragment.newInstance());
+                    add(PlaylistFragment.newInstance());
+                }
+            }
+    );
+
+    private final MusicServiceConnetion m_musicServiceConnection = new MusicServiceConnetion();
+
     private MusicService m_musicService;
-    private Intent       m_musicServiceIntent;
-    private boolean      bindedService;
+    private boolean      m_bindedService;
 
-    /**
-     * The {@link android.support.v4.view.PagerAdapter} that will provide
-     * fragments for each of the sections. We use a
-     * {@link FragmentPagerAdapter} derivative, which will keep every
-     * loaded fragment in memory. If this becomes too memory intensive, it
-     * may be best to switch to a
-     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
-     */
-    private PlayFragmentsAdapter play_fragments_adapter;
+    private MusicPlayerController m_mediaController;
 
-    /**
-     * The {@link ViewPager} that will host the section contents.
-     */
-    private ViewPager viewPager;
-
-    // OFFERED INTERFACE
-    private OnActivityInteractionListener m_interaction_listener;
-    public interface OnActivityInteractionListener {
-        void onKeyBackPressed();
-    }
+    private Handler m_handler;
 
     // INNER CLASS
 
@@ -54,7 +69,12 @@ public class MainActivity extends AppCompatActivity {
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
      * Clase interna privada pues no necesita ser utilzada en ninguna otra parte
-     *
+     * The {@link android.support.v4.view.PagerAdapter} that will provide
+     * fragments for each of the sections. We use a
+     * {@link FragmentPagerAdapter} derivative, which will keep every
+     * loaded fragment in memory. If this becomes too memory intensive, it
+     * may be best to switch to a
+     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
      */
     private class PlayFragmentsAdapter extends FragmentPagerAdapter {
 
@@ -72,79 +92,159 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public Fragment getItem(int position) {
-            switch (position) {
-                case 0:
-                    SongFragment songFragment = SongFragment.newInstance();
-                    //m_interaction_listener = songFragment;
-                    return songFragment;
-                case 1:
-                    FolderFragment folderFragment = FolderFragment.newInstance();
-                    m_interaction_listener = folderFragment;
-                    return folderFragment;
-                case 2:
-                    PlaylistFragment playlistFragment = PlaylistFragment.newInstance();
-                    //m_interaction_listener = playlistFragment;
-                    return playlistFragment;
-                default:
-                    return null;
-            }
+        public int getCount() {
+            return PLAYITEM_PAGES.size();
         }
 
         @Override
-        public int getCount() {
-            return 3;
+        public Fragment getItem(int position) {
+            return PLAYITEM_PAGES.get(position);
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
-            switch (position) {
-                case 0:
-                    return getResources().getString(R.string.label_tab_songs);
-                case 1:
-                    return getResources().getString(R.string.label_tab_folders);
-                case 2:
-                    return getResources().getString(R.string.label_tab_playlists);
-                /*case 3:
-                    return getResources().getString(R.string.label_tab_player);*/
-            }
-            return null;
+            return PLAYITEM_PAGES.get(position).getTabTitle();
         }
 
-        // SLIDING PANE
-        // refs -> https://www.numetriclabz.com/implementation-of-sliding-up-panel-using-androidslidinguppanel-in-android-tutorial/
-        // https://www.google.com.co/search?q=sliding+up+panel+android+example&oq=sliding+up+&gs_l=psy-ab.3.2.0j0i22i30k1l3.32149.32655.0.34932.3.3.0.0.0.0.186.533.0j3.3.0....0...1.1.64.psy-ab..0.3.532....0.FMCSb4YClAc
-        // http://www.devexchanges.info/2015/05/making-sliding-up-panel-like-google.html
     }
 
-    // Activity Life
+    /**
+     *
+     */
+    private class MusicServiceConnetion implements ServiceConnection {
+
+        MusicServiceConnetion(){}
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MusicService.MusicServiceBinder musicBinder =  (MusicService.MusicServiceBinder) service;
+            m_musicService  = musicBinder.getMusicService();
+            m_bindedService = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            m_musicService  = null;
+            m_bindedService = false;
+        }
+
+    }
+
+    // CONSTRUCT
+
+    public MainActivity() {}
+
+    // Activity Lifecycle
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity_layout);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        play_fragments_adapter = new PlayFragmentsAdapter(getSupportFragmentManager());
+        PlayFragmentsAdapter playFragmentsAdapter =
+                new PlayFragmentsAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
-        viewPager = (ViewPager) findViewById(R.id.play_pages_pager);
-        viewPager.setAdapter(play_fragments_adapter);
+        // The ViewPager that will host the section contents.
+        final ViewPager viewPager = (ViewPager) findViewById(R.id.play_pages_pager);
+        viewPager.setAdapter(playFragmentsAdapter);
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        final TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
+
+        m_bindedService = false;
+
+        m_handler = new Handler(getMainLooper());
 
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        // bind music service
+        // le paso el contexto de la actividad para que se liberen los recursos cuando esta se cierre
+        bindService(new Intent(this, MusicService.class), m_musicServiceConnection, BIND_AUTO_CREATE);
+        refreshMediaController();
     }
 
-    // METHODS AND IMPLEMENTED INTERFACES
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (m_mediaController != null) {
+            m_mediaController.setEnabled(true);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (m_mediaController != null) {
+            m_mediaController.setEnabled(false);
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        unbindService(m_musicServiceConnection);
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        m_mediaController = null;
+        super.onDestroy();
+    }
+
+    // OWN AND IMPLEMENTED METHODS
+
+    private void refreshMediaController() {
+        if (m_musicService != null) {
+            if (m_mediaController == null) {
+                m_mediaController = new MusicPlayerController(this);
+                View mediaControlView = findViewById(R.id.main_activity_container);
+                //mediaControlView.setOnTouchListener(this);
+                m_mediaController.setAnchorView(mediaControlView);
+                m_mediaController.setMusicPlayer(m_musicService);
+            }
+            m_mediaController.hide();
+            m_mediaController.show(13000);
+        }
+    }
+
+    @Override
+    public void onPlayItemPlaySelected(PlayItem playItem) {
+        Intent musicServiceIntent = new Intent(this, MusicService.class);
+        musicServiceIntent.setAction(MusicService.ACTION_PLAY);
+        Bundle bundle;
+        if (playItem.getItemType() == Song.ITEMTYPE) {
+            musicServiceIntent.setData(((Song) playItem).getUri());
+        } else {
+            bundle = new Bundle();
+            if (playItem.getItemType() == Folder.ITEMTYPE) {
+                bundle.putString(MusicService.EXTRA_KEY_FOLDER_PATH_TO_PLAY,
+                        ((Folder) playItem).getPath());
+            } else {
+                bundle.putLong(MusicService.EXTRA_KEY_PLAYLIST_ID_TO_PLAY,
+                        ((Playlist) playItem).getId());
+            }
+            musicServiceIntent.putExtras(bundle);
+        }
+        bindService(musicServiceIntent, m_musicServiceConnection, BIND_AUTO_CREATE);
+        startService(musicServiceIntent);
+        refreshMediaController();
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        //Toast.makeText(this, "Jueputa haz dado un toque", Toast.LENGTH_SHORT).show();
+        if (m_mediaController != null && !m_mediaController.isShowing())
+            m_mediaController.show(13000);
+        return super.dispatchTouchEvent(ev);
+    }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -152,10 +252,10 @@ public class MainActivity extends AppCompatActivity {
         // fisicos del dispositivo. Si es accionada la tecla de retroceso se enviara el evento
         // para ser repondido por el fragmento que implemente la interfaz.
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (m_interaction_listener != null) {
+            /*if (m_interaction_listener != null) {
                 m_interaction_listener.onKeyBackPressed();
                 return true;
-            }
+            }*/
         }
         // En cualquier caso se respondera normalmente a la accion sobre los controles que no nos importan.
         return super.onKeyDown(keyCode, event);

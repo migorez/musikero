@@ -62,7 +62,7 @@ public class MusicService extends Service implements
      * Essential list for playback
      */
     private long m_playBackListId;
-    private PlaybackList m_playback_list;
+    private PlaybackList m_playbackList;
     private PlayBackListLoader m_playBackListLoader;
 
     private AudioManager m_audioManager;
@@ -383,8 +383,8 @@ public class MusicService extends Service implements
     private void actionPause() {
         if (m_playbackState == PlaybackState.Playing) {
             m_mediaPlayer.pause();
-            m_playbackState = PlaybackState.Paused;
             relaxResources(false);
+            m_playbackState = PlaybackState.Paused;
             // no abandonar el foco de audio. Probablemente se pierda solo.
         }
     }
@@ -401,10 +401,10 @@ public class MusicService extends Service implements
             m_mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             if (uri != null) {
                 m_mediaPlayer.setDataSource(getApplicationContext(), uri);
-            } else if (m_playback_list != null && m_playback_list.size() > 0) {
-                m_mediaPlayer.setDataSource(getApplicationContext(), m_playback_list.getRandomUri());
+            } else if (m_playbackList != null && m_playbackList.size() > 0) {
+                m_mediaPlayer.setDataSource(getApplicationContext(), m_playbackList.getRandomUri());
             } else {
-                Toast.makeText(getApplicationContext(), "\tMusiKero\nNo más que reproducir.",
+                Toast.makeText(getApplicationContext(), "MusiKero\nNo más que reproducir.",
                         Toast.LENGTH_LONG).show();
                 actionStop();
                 return;
@@ -420,7 +420,13 @@ public class MusicService extends Service implements
      *
      * */
     private void actionPrev() {
-        actionNext(null);
+        if (m_playbackState == PlaybackState.Playing || m_playbackState == PlaybackState.Paused) {
+            if (m_playbackList != null) {
+                actionNext(m_playbackList.getPrev().getUri());
+            }
+        } else {
+            actionNext(null);
+        }
     }
 
     /**
@@ -478,27 +484,25 @@ public class MusicService extends Service implements
      * Configura una notificacion que indica al usuario que el servicio esta activo.
      */
     private void setupAsForeground(String tickerText) {
-        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0,
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                getApplicationContext(),
+                0,
                 new Intent(getApplicationContext(), MainActivity.class),
                 PendingIntent.FLAG_UPDATE_CURRENT);
+
         NotificationCompat.Builder notificationBuilder =
-                new NotificationCompat.Builder(getApplicationContext())
+                new NotificationCompat.Builder(getApplicationContext());
+        notificationBuilder
                 .setContentIntent(pendingIntent)
                 .setTicker(tickerText)
                 .setContentTitle("Musikero")
                 .setContentText("Reproduciendo...")
+                .setOngoing(true)
                 .setWhen(System.currentTimeMillis())
                 .setVibrate(new long[]{900, 400, 1100, 700, 1400, 500, 2200});
-        notificationBuilder.mNotification.flags |= Notification.FLAG_ONGOING_EVENT;
+
         m_notification = notificationBuilder.build();
         startForeground(NOTIFICATION_ID, m_notification);
-    }
-
-    /**
-     * Set the continuous playback list to play in background
-     */
-    public void setPlayBackListId(long playbackListId) {
-        this.m_playBackListId = playbackListId;
     }
 
     // IMPLEMENTS METHODS
@@ -532,6 +536,7 @@ public class MusicService extends Service implements
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
+        actionStop();
         return false;
     }
 
@@ -546,15 +551,16 @@ public class MusicService extends Service implements
         // al ejecutar el Loader este gatillara este metodo al retornar doInBacnkground. Si ha obtenido
         // una lista de playback se empezara a reproducir.
         if (data != null) {
-            m_playback_list = new PlaybackList(data); // may be null if are not storage for example
+            m_playbackList = new PlaybackList(data); // may be null if are not storage for example
         }
         actionNext(null); // next uri of playback_list if not is null
     }
 
     @Override
     public void onLoadCanceled(Loader<List<Song>> loader) {
-        m_playback_list = null;
+        m_playbackList = null;
     }
+
 
     // BINDER METHODS
 
@@ -562,7 +568,7 @@ public class MusicService extends Service implements
      * Class used for the client Binder.  Because we know this service always
      * runs in the same process as its clients, we don't need to deal with IPC.
      */
-    public class MusicServiceBinder extends Binder {
+    public final class MusicServiceBinder extends Binder {
 
         MusicServiceBinder() {}
 
@@ -572,9 +578,48 @@ public class MusicService extends Service implements
 
     }
 
+    // methods for player control view
+
+    public int getPlaybackPosition() {
+        if (m_mediaPlayer != null && m_mediaPlayer.isPlaying())
+            return m_mediaPlayer.getCurrentPosition();
+        return 0;
+    }
+
+    public int getPlaybackDuration() {
+        if (m_mediaPlayer != null)
+            return m_mediaPlayer.getDuration();
+        return 0;
+    }
+
+    public boolean isOnPlayback() {
+        return m_mediaPlayer != null && m_mediaPlayer.isPlaying();
+    }
+
+    public void setSeekTo(int seekPos) {
+        m_mediaPlayer.seekTo(seekPos);
+    }
+
+    public void controlPlayPause() {
+        actionPlayPause();
+    }
+
+    public void controlNext() {
+        actionNext(null);
+    }
+
+    public void controlPrev() {
+        actionPrev();
+    }
+
     @Override
     public IBinder onBind(Intent intent) {
         return m_musicServiceBinder;
     }
 
+    @Override
+    public boolean onUnbind(Intent intent) {
+        // no hacemos nada al desenlazar pues el servicio deberia seguir si tiene mas trabajo
+        return super.onUnbind(intent);
+    }
 }
