@@ -72,7 +72,7 @@ public class FolderFragment extends PlayItemFragment {
     public void onStart() {
         super.onStart();
         // at first time create the loader instance whit the id provided.
-        m_playItemLoader.reloadData(Folder.ITEMTYPE, null);
+        m_playItemLoader.reloadData(Folder.m_ITEMTYPE, null);
     }
 
     @Override
@@ -128,11 +128,11 @@ public class FolderFragment extends PlayItemFragment {
 
     @Override
     public void onPlayItemClick(PlayItem playItem) {
-        if (playItem.getItemType() == Folder.ITEMTYPE) {
-            m_playItemLoader.reloadData(Folder.ITEMTYPE, ((Folder) playItem).getPath());
+        if (playItem.getItemType() == Folder.m_ITEMTYPE) {
+            m_playItemLoader.reloadData(Folder.m_ITEMTYPE, ((Folder) playItem).getPath());
         } else {
             if (m_playItemCallbacks != null) {
-                m_playItemCallbacks.onPlayItemPlaySelected(playItem);
+                m_playItemCallbacks.onSelectPlayItemForPlayback(playItem);
             }
         }
     }
@@ -140,7 +140,7 @@ public class FolderFragment extends PlayItemFragment {
     @Override
     public void onPlayItemLongClick(PlayItem playItem) {
         if (m_playItemCallbacks != null) {
-            m_playItemCallbacks.onPlayItemPlaySelected(playItem);
+            m_playItemCallbacks.onSelectPlayItemForPlayback(playItem);
         }
         Toast.makeText(getContext(), "LongClick en " + playItem.getDisplayName(),
                 Toast.LENGTH_SHORT).show();

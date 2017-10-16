@@ -9,4 +9,11 @@
         android:icon="@mipmap/ic_volume_up"
         android:title="@string/label_volume_up_option"
         app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/menu_main_stop_playback"
+        android:orderInCategory="2"
+        android:title="@string/label_stop_playback"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_stop" />
 </menu>

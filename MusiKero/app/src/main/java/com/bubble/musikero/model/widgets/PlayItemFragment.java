@@ -65,7 +65,7 @@ public abstract class PlayItemFragment extends Fragment implements
      *
      */
     public interface PlayItemFragmentCallbacks {
-        void onPlayItemPlaySelected(PlayItem playItem);
+        void onSelectPlayItemForPlayback(PlayItem playItem);
     }
 
 }

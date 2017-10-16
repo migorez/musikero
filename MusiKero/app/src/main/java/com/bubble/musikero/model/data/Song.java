@@ -2,6 +2,7 @@ package com.bubble.musikero.model.data;
 
 import android.content.ContentUris;
 import android.net.Uri;
+import android.os.Parcel;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,10 +15,13 @@ import java.util.Locale;
 
 /**
  * Created by Miguel on 05/09/2017.
+ * Song
+ *
  */
+
 public class Song extends PlayItem {
 
-    public static final int ITEMTYPE = 0;
+    public static final int m_ITEMTYPE = 0;
 
     private long   m_id;
     private String m_display_name;
@@ -27,9 +31,10 @@ public class Song extends PlayItem {
     private String m_folder_name;
     private String m_folder_path;
 
-    // Constructor
+    // Constructors
+
     public Song(long id, String display, String path, long duration){
-        super(ITEMTYPE);
+        super(m_ITEMTYPE);
         m_id = id;
         m_display_name = display;
         m_path = path;
@@ -40,6 +45,59 @@ public class Song extends PlayItem {
         m_folder_path = m_path.substring(0, index_last_slash); // desde el primer (incluido) hasta antes del segundo valor (sin sin incluirlo)
         index_last_slash = m_folder_path.lastIndexOf("/");
         m_folder_name = m_folder_path.substring(index_last_slash + 1);
+    }
+
+    // PARCELABLE IMPLEMENTATION
+
+    private Song(Parcel in) {
+        super(m_ITEMTYPE);
+        m_itemType = in.readInt();
+        m_id = in.readLong();
+        m_display_name = in.readString();
+        m_path = in.readString();
+        m_duration_mills = in.readLong();
+        m_folder_name = in.readString();
+        m_folder_path = in.readString();
+    }
+
+    public static final Creator<Song> CREATOR = new Creator<Song>() {
+        @Override
+        public Song createFromParcel(Parcel in) {
+            return new Song(in);
+        }
+
+        @Override
+        public Song[] newArray(int size) {
+            return new Song[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(m_itemType);
+        dest.writeLong(m_id);
+        dest.writeString(m_display_name);
+        dest.writeString(m_path);
+        dest.writeLong(m_duration_mills);
+        dest.writeString(m_folder_name);
+        dest.writeString(m_folder_path);
+    }
+
+    // GETTERS AND SETTERS
+
+    @Override
+    public void setListPosition(int listPosition) {
+        m_listPosition = listPosition;
+    }
+
+    @Override
+    public int getListPosition() {
+        return m_listPosition;
     }
 
     public long getId() {
@@ -105,7 +163,7 @@ public class Song extends PlayItem {
 
     @Override
     public int getItemType() {
-        return item_type;
+        return m_itemType;
     }
 
 }

@@ -12,6 +12,8 @@ import java.util.List;
 
 /**
  * Created by Miguel on 30/09/2017.
+ *
+ *
  */
 public class PlayItemLoader extends AsyncTaskLoader<List<PlayItem>> {
 
@@ -42,14 +44,14 @@ public class PlayItemLoader extends AsyncTaskLoader<List<PlayItem>> {
     @Override
     public List<PlayItem> loadInBackground() {
         switch (m_typeListLoad) {
-            case Song.ITEMTYPE:
+            case Song.m_ITEMTYPE:
                 return PlayItemProvider.getDeviceSongs(getContext());
-            case Folder.ITEMTYPE:
+            case Folder.m_ITEMTYPE:
                 if (m_folderPathLoad != null) {
                     return PlayItemProvider.getFolderSongs(getContext(), m_folderPathLoad);
                 }
                 return PlayItemProvider.getPlayFolders(getContext());
-            case Playlist.ITEMTYPE:
+            case Playlist.m_ITEMTYPE:
                 return PlayItemProvider.getPlaylists(getContext());
             default:
                 return null;

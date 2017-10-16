@@ -18,7 +18,10 @@ import java.util.List;
 
 /**
  * Created by Miguel on 05/09/2017.
+ * SongFragment
+ *
  */
+
 public class SongFragment extends PlayItemFragment {
 
     // CONSTRUCTION
@@ -68,7 +71,7 @@ public class SongFragment extends PlayItemFragment {
     @Override
     public void onStart() {
         super.onStart();
-        m_playItemLoader.reloadData(Song.ITEMTYPE, null);
+        m_playItemLoader.reloadData(Song.m_ITEMTYPE, null);
     }
 
     @Override
@@ -122,17 +125,19 @@ public class SongFragment extends PlayItemFragment {
             m_playItemListAdapter.setItems(data);
     }
 
+    // IMPLEMENT PLAYITEM VIEW HOLDER CLICKS LISTENER
+
     @Override
     public void onPlayItemClick(PlayItem playItem) {
         if (m_playItemCallbacks != null) {
-            m_playItemCallbacks.onPlayItemPlaySelected(playItem);
+            m_playItemCallbacks.onSelectPlayItemForPlayback(playItem);
         }
     }
 
     @Override
     public void onPlayItemLongClick(PlayItem playItem) {
         if (m_playItemCallbacks != null) {
-            m_playItemCallbacks.onPlayItemPlaySelected(playItem);
+            m_playItemCallbacks.onSelectPlayItemForPlayback(playItem);
         }
     }
 

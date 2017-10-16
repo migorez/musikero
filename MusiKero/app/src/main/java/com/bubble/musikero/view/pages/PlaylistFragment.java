@@ -2,8 +2,6 @@ package com.bubble.musikero.view.pages;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,18 +11,16 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.bubble.musikero.R;
-import com.bubble.musikero.model.PlayItemLoader;
 import com.bubble.musikero.model.data.PlayItem;
 import com.bubble.musikero.model.data.Playlist;
 import com.bubble.musikero.model.widgets.PlayItemFragment;
-import com.bubble.musikero.model.widgets.PlayItemRecyclerAdapter;
-import com.bubble.musikero.model.widgets.PlayItemViewHolder;
-import com.bubble.musikero.view.MainActivity;
 
 import java.util.List;
 
 /**
  * Created by Miguel on 12/09/2017.
+ * PlaylistFragment
+ *
  */
 public class PlaylistFragment extends PlayItemFragment {
 
@@ -73,7 +69,7 @@ public class PlaylistFragment extends PlayItemFragment {
     @Override
     public void onStart() {
         super.onStart();
-        m_playItemLoader.reloadData(Playlist.ITEMTYPE, null);
+        m_playItemLoader.reloadData(Playlist.m_ITEMTYPE, null);
     }
 
     @Override

@@ -3,17 +3,15 @@ package com.bubble.musikero.view;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.Handler;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-
-import android.support.v4.view.ViewPager;
-import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,12 +20,9 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.bubble.musikero.R;
-import com.bubble.musikero.controlador.player.MusicPlayerController;
+import com.bubble.musikero.controlador.player.MediaMusicController;
 import com.bubble.musikero.controlador.player.MusicService;
-import com.bubble.musikero.model.data.Folder;
 import com.bubble.musikero.model.data.PlayItem;
-import com.bubble.musikero.model.data.Playlist;
-import com.bubble.musikero.model.data.Song;
 import com.bubble.musikero.model.widgets.PlayItemFragment;
 import com.bubble.musikero.view.pages.FolderFragment;
 import com.bubble.musikero.view.pages.PlaylistFragment;
@@ -38,11 +33,9 @@ import java.util.Collections;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements
-        PlayItemFragment.PlayItemFragmentCallbacks {
+        PlayItemFragment.PlayItemFragmentCallbacks, View.OnTouchListener {
 
     // ATTRIBUTES AND CONSTANTS
-
-    private static final int mBIND_NOT_CREATE = 0;
 
     private static final List<PlayItemFragment> PLAYITEM_PAGES = Collections.unmodifiableList(
             new ArrayList<PlayItemFragment>(){
@@ -57,11 +50,8 @@ public class MainActivity extends AppCompatActivity implements
     private final MusicServiceConnetion m_musicServiceConnection = new MusicServiceConnetion();
 
     private MusicService m_musicService;
-    private boolean      m_bindedService;
 
-    private MusicPlayerController m_mediaController;
-
-    private Handler m_handler;
+    private MediaMusicController m_mediaController;
 
     // INNER CLASS
 
@@ -111,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements
     /**
      *
      */
-    private class MusicServiceConnetion implements ServiceConnection {
+    private final class MusicServiceConnetion implements ServiceConnection {
 
         MusicServiceConnetion(){}
 
@@ -119,13 +109,11 @@ public class MainActivity extends AppCompatActivity implements
         public void onServiceConnected(ComponentName name, IBinder service) {
             MusicService.MusicServiceBinder musicBinder =  (MusicService.MusicServiceBinder) service;
             m_musicService  = musicBinder.getMusicService();
-            m_bindedService = true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
             m_musicService  = null;
-            m_bindedService = false;
         }
 
     }
@@ -134,32 +122,27 @@ public class MainActivity extends AppCompatActivity implements
 
     public MainActivity() {}
 
-    // Activity Lifecycle
+    // ACTIVITY LIFE
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity_layout);
+        findViewById(R.id.main_activity_container).setOnTouchListener(this);
 
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.main_activity_toolbar);
         setSupportActionBar(toolbar);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        PlayFragmentsAdapter playFragmentsAdapter =
-                new PlayFragmentsAdapter(getSupportFragmentManager());
+        PlayFragmentsAdapter playFragmentsAdapter = new PlayFragmentsAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
         // The ViewPager that will host the section contents.
-        final ViewPager viewPager = (ViewPager) findViewById(R.id.play_pages_pager);
+        ViewPager viewPager = (ViewPager) findViewById(R.id.main_activity_pager);
         viewPager.setAdapter(playFragmentsAdapter);
 
-        final TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.main_activity_tabs);
         tabLayout.setupWithViewPager(viewPager);
-
-        m_bindedService = false;
-
-        m_handler = new Handler(getMainLooper());
-
     }
 
     @Override
@@ -167,96 +150,99 @@ public class MainActivity extends AppCompatActivity implements
         super.onStart();
         // bind music service
         // le paso el contexto de la actividad para que se liberen los recursos cuando esta se cierre
-        bindService(new Intent(this, MusicService.class), m_musicServiceConnection, BIND_AUTO_CREATE);
-        refreshMediaController();
+        // intent refs => https://developer.android.com/guide/components/intents-filters.html?hl=es-419
+        Intent musicService = new Intent();
+        musicService.setClass(this, MusicService.class);
+        musicService.setAction(MusicService.BIND_MUSIC_SERVICE);
+        bindService(musicService, m_musicServiceConnection, BIND_AUTO_CREATE);
+        initMediaController();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (m_mediaController != null) {
-            m_mediaController.setEnabled(true);
-        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (m_mediaController != null) {
-            m_mediaController.setEnabled(false);
-        }
     }
 
     @Override
     protected void onStop() {
-        unbindService(m_musicServiceConnection);
         super.onStop();
+        unbindService(m_musicServiceConnection);
     }
 
     @Override
     protected void onDestroy() {
-        m_mediaController = null;
         super.onDestroy();
+        m_mediaController = null;
     }
 
     // OWN AND IMPLEMENTED METHODS
 
-    private void refreshMediaController() {
+    private void initMediaController() {
         if (m_musicService != null) {
             if (m_mediaController == null) {
-                m_mediaController = new MusicPlayerController(this);
-                View mediaControlView = findViewById(R.id.main_activity_container);
-                //mediaControlView.setOnTouchListener(this);
-                m_mediaController.setAnchorView(mediaControlView);
-                m_mediaController.setMusicPlayer(m_musicService);
+                m_mediaController = new MediaMusicController(this);
+                m_mediaController.setPlayerControlsListener(m_musicService);
+                m_mediaController.setAnchorView(findViewById(R.id.main_activity_container));
             }
-            m_mediaController.hide();
-            m_mediaController.show(13000);
+            m_mediaController.show(/*13000*/); // default 3000 rested of my wished value
         }
     }
 
+    // PLAYITEM FRAGMENTS CALLBACKS
     @Override
-    public void onPlayItemPlaySelected(PlayItem playItem) {
+    public void onSelectPlayItemForPlayback(PlayItem playItem) {
         Intent musicServiceIntent = new Intent(this, MusicService.class);
         musicServiceIntent.setAction(MusicService.ACTION_PLAY);
-        Bundle bundle;
-        if (playItem.getItemType() == Song.ITEMTYPE) {
-            musicServiceIntent.setData(((Song) playItem).getUri());
-        } else {
-            bundle = new Bundle();
-            if (playItem.getItemType() == Folder.ITEMTYPE) {
-                bundle.putString(MusicService.EXTRA_KEY_FOLDER_PATH_TO_PLAY,
-                        ((Folder) playItem).getPath());
-            } else {
-                bundle.putLong(MusicService.EXTRA_KEY_PLAYLIST_ID_TO_PLAY,
-                        ((Playlist) playItem).getId());
-            }
-            musicServiceIntent.putExtras(bundle);
-        }
-        bindService(musicServiceIntent, m_musicServiceConnection, BIND_AUTO_CREATE);
+        musicServiceIntent.putExtra(MusicService.PLAYITEM_FOR_PLAYBACK_ARG, playItem);
         startService(musicServiceIntent);
-        refreshMediaController();
+        bindService(musicServiceIntent, m_musicServiceConnection, BIND_AUTO_CREATE);
+        initMediaController();
     }
 
+    // touch screen listener
     @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        if (m_mediaController != null) {
+            switch (v.getId()) {
+                case R.id.main_activity_pager:
+                    m_mediaController.mHide();
+                    break;
+                case R.id.main_activity_toolbar:
+                    m_mediaController.show();
+                    break;
+                default:
+                    break;
+            }
+        }
+        Toast.makeText(this, "Haz dado un toque", Toast.LENGTH_SHORT).show();
+        return true;
+    }
+
+    /*@Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        //Toast.makeText(this, "Jueputa haz dado un toque", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "Haz dado un toque", Toast.LENGTH_SHORT).show();
+
         if (m_mediaController != null && !m_mediaController.isShowing())
             m_mediaController.show(13000);
         return super.dispatchTouchEvent(ev);
-    }
+    }*/
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         // Se implementa el metodo de la actividad que responde a la accion sobre los controles
         // fisicos del dispositivo. Si es accionada la tecla de retroceso se enviara el evento
         // para ser repondido por el fragmento que implemente la interfaz.
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            /*if (m_interaction_listener != null) {
+        /*if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (m_interaction_listener != null) {
                 m_interaction_listener.onKeyBackPressed();
                 return true;
-            }*/
-        }
+            }
+        }*/
         // En cualquier caso se respondera normalmente a la accion sobre los controles que no nos importan.
         return super.onKeyDown(keyCode, event);
     }
@@ -278,9 +264,10 @@ public class MainActivity extends AppCompatActivity implements
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        /*if (id == R.id.action_settings) {
+        if (id == R.id.menu_main_stop_playback) {
+            stopService(new Intent(this, MusicService.class));
             return true;
-        }*/
+        }
 
         return super.onOptionsItemSelected(item);
     }
