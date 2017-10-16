@@ -1,6 +1,6 @@
 package com.bubble.musikero.model.data;
 
-import android.support.annotation.Nullable;
+import android.os.Parcel;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,10 +15,12 @@ import java.util.Locale;
 
 /**
  * Created by Miguel on 10/09/2017.
+ * Playlist
+ *
  */
 public class Playlist extends PlayItem {
 
-    public static final int ITEMTYPE = 2;
+    public static final int m_ITEMTYPE = 2;
 
     public static final List<Playlist> DEFAULT_PLAYLISTS = Collections.unmodifiableList(
             new ArrayList<Playlist>() {
@@ -37,9 +39,52 @@ public class Playlist extends PlayItem {
     /**
      * */
     public Playlist(long id, String name) {
-        super(ITEMTYPE);
+        super(m_ITEMTYPE);
         m_id = id;
         m_name = name;
+    }
+
+    // PARCELABLE IMPLEMENTATION
+
+    public Playlist(Parcel in) {
+        super(m_ITEMTYPE);
+        m_itemType = in.readInt();
+        m_id = in.readLong();
+        m_name = in.readString();
+    }
+
+    public static final Creator<Playlist> CREATOR = new Creator<Playlist>() {
+        @Override
+        public Playlist createFromParcel(Parcel in) {
+            return new Playlist(in);
+        }
+
+        @Override
+        public Playlist[] newArray(int size) {
+            return new Playlist[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+
+    }
+
+    // GETTERS AND SETTERS
+
+    @Override
+    public void setListPosition(int listPosition) {
+        m_listPosition = listPosition;
+    }
+
+    @Override
+    public int getListPosition() {
+        return m_listPosition;
     }
 
     public long getId() {
@@ -97,7 +142,7 @@ public class Playlist extends PlayItem {
 
     @Override
     public int getItemType() {
-        return item_type;
+        return m_itemType;
     }
 
 }

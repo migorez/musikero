@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bubble.musikero">
 
+    <!--https://developer.android.com/guide/topics/manifest/manifest-intro.html#perms-->
+    <!--<permission android:name="com.bubble.musikero.PLAY_MUSIK" />-->
+
     <!--
      Requerida por el metodo setWakeLock de nuestro objeto MediaPlayer. Este otorga el permiso
      de permitir apagar la pantalla del dispositivo y seguir utilizando el procesador
@@ -11,27 +14,48 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
+    <!--<uses-permission android:name="com.bubble.musikero.PLAY_MUSIK" />-->
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:supportsRtl="true"
+        android:enabled="true"
+        android:supportsRtl="false"
         android:theme="@style/AppTheme">
+
         <activity
             android:name=".view.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- ATTENTION: This intent was auto-generated. Follow instructions at
+  https://g.co/AppIndexing/AndroidStudio to publish your URLs. -->
+            <!--<intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                &lt;!&ndash; ATTENTION: This data URL was auto-generated. We recommend that you use the HTTP scheme.
+                  TODO: Change the host or pathPrefix as necessary. &ndash;&gt;
+                <data
+                    android:host="https://mipage.com"
+                    android:pathPrefix="/main"
+                    android:scheme="http" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.GET_CONTENT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.item/vnd.google.note" />
+            </intent-filter>-->
         </activity>
 
         <service
             android:name=".controlador.player.MusicService"
             android:enabled="true"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.bubble.musikero.action.PLAY" />
                 <action android:name="com.bubble.musikero.action.STOP" />
@@ -40,6 +64,7 @@
                 <action android:name="com.bubble.musikero.action.PREV" />
                 <action android:name="com.bubble.musikero.action.ADDTAIL" />
                 <action android:name="com.bubble.musikero.action.PLAYALL" />
+                <action android:name="com.bubble.musikero.action.BIND_MUSIC_SERVICE" />
             </intent-filter>
         </service>
     </application>

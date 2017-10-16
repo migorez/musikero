@@ -12,13 +12,15 @@ import java.util.List;
 
 /**
  * Created by Miguel on 30/09/2017.
+ *
+ *
  */
 public class PlayItemLoader extends AsyncTaskLoader<List<PlayItem>> {
 
     public static final int ARG_ONLY_INSTANCE_LOADER = 0;
 
     private int m_typeListLoad;
-    private String folderPathLoad;
+    private String m_folderPathLoad;
 
     /**
      * Este objeto es creado y anadido a la instancia del LoaderManager del fragmento que lo usa,
@@ -28,9 +30,9 @@ public class PlayItemLoader extends AsyncTaskLoader<List<PlayItem>> {
         super(context);
     }
 
-    public void reloadData(int typeListLoad, String folder_path) {
+    public void reloadData(int typeListLoad, String folderPath) {
         this.m_typeListLoad = typeListLoad;
-        this.folderPathLoad = folder_path;
+        this.m_folderPathLoad = folderPath;
         forceLoad();
     }
 
@@ -42,14 +44,14 @@ public class PlayItemLoader extends AsyncTaskLoader<List<PlayItem>> {
     @Override
     public List<PlayItem> loadInBackground() {
         switch (m_typeListLoad) {
-            case Song.ITEMTYPE:
+            case Song.m_ITEMTYPE:
                 return PlayItemProvider.getDeviceSongs(getContext());
-            case Folder.ITEMTYPE:
-                if (folderPathLoad != null) {
-                    return PlayItemProvider.getFolderSongs(getContext(), folderPathLoad);
+            case Folder.m_ITEMTYPE:
+                if (m_folderPathLoad != null) {
+                    return PlayItemProvider.getFolderSongs(getContext(), m_folderPathLoad);
                 }
                 return PlayItemProvider.getPlayFolders(getContext());
-            case Playlist.ITEMTYPE:
+            case Playlist.m_ITEMTYPE:
                 return PlayItemProvider.getPlaylists(getContext());
             default:
                 return null;

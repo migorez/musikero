@@ -46,6 +46,10 @@
     <string name="text_time_playback">%1$s de reproducción</string>
 
     <!-- labels menu options -->
-    <string name="label_volume_up_option">Subir el Volumen</string>
+    <string name="label_volume_up_option">Subir el volumen</string>
+    <string name="label_stop_playback">Detener reproducción</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

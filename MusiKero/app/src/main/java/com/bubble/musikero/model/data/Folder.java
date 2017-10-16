@@ -1,6 +1,6 @@
 package com.bubble.musikero.model.data;
 
-import android.support.annotation.Nullable;
+import android.os.Parcel;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,10 +12,12 @@ import java.util.Locale;
 
 /**
  * Created by Miguel on 02/08/2017.
+ * Class that manage the folders content
+ *
  */
 public class Folder extends PlayItem {
 
-    public static final int ITEMTYPE = 1;
+    public static final int m_ITEMTYPE = 1;
 
     private String m_name;
     private String m_path;
@@ -23,11 +25,60 @@ public class Folder extends PlayItem {
     private long   m_content_duration;
 
     public Folder(String name, String path) {
-        super(ITEMTYPE);
+        super(m_ITEMTYPE);
         m_name             = name;
         m_path             = path;
         m_content_count    = 0;
         m_content_duration = 0;
+    }
+
+    // PARCELABLE IMPLEMENTATION
+
+    private Folder(Parcel in) {
+        super(m_ITEMTYPE);
+        m_itemType = in.readInt();
+        m_name = in.readString();
+        m_path = in.readString();
+        m_content_count = in.readInt();
+        m_content_duration = in.readLong();
+    }
+
+    public static final Creator<Folder> CREATOR = new Creator<Folder>() {
+        @Override
+        public Folder createFromParcel(Parcel in) {
+            return new Folder(in);
+        }
+
+        @Override
+        public Folder[] newArray(int size) {
+            return new Folder[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(m_itemType);
+        dest.writeString(m_name);
+        dest.writeString(m_path);
+        dest.writeInt(m_content_count);
+        dest.writeLong(m_content_duration);
+    }
+
+    // GETTERS AND SETTERS
+
+    @Override
+    public void setListPosition(int listPosition) {
+        m_listPosition = listPosition;
+    }
+
+    @Override
+    public int getListPosition() {
+        return m_listPosition;
     }
 
     /**
@@ -100,7 +151,7 @@ public class Folder extends PlayItem {
 
     @Override
     public int getItemType() {
-        return item_type;
+        return m_itemType;
     }
 
 }
