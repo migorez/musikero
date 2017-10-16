@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 import com.bubble.musikero.R;
 import com.bubble.musikero.model.data.PlayItem;
 import com.bubble.musikero.model.data.Song;
-import com.bubble.musikero.model.widgets.PlayItemFragment;
+import com.bubble.musikero.view.PlayItemFragment;
 
 import java.util.List;
 

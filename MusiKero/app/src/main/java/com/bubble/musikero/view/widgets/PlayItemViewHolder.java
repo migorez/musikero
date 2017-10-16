@@ -1,4 +1,4 @@
-package com.bubble.musikero.model.widgets;
+package com.bubble.musikero.view.widgets;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -26,12 +26,12 @@ public class PlayItemViewHolder extends RecyclerView.ViewHolder implements
     }
 
     // Default Constructor
-    PlayItemViewHolder(View itemView) {
+    public PlayItemViewHolder(View itemView) {
         super(itemView);
     }
 
     /***/
-    void onBindViewHolder(PlayItem play_item, OnPlayItemViewHolderClickListener onPlayItemClick) {
+    public void onBindViewHolder(PlayItem play_item, OnPlayItemViewHolderClickListener onPlayItemClick) {
         if (play_item != null) {
             // le paso el View al objeto PlayItem para que lo setee con sus datos
             play_item.setViewHolder(this.itemView);

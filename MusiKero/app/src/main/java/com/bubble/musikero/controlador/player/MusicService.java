@@ -446,7 +446,9 @@ public class MusicService extends Service implements
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
-        actionStop(false);
+        Toast.makeText(getApplicationContext(), "Error en la reproducción\n" +
+                "what = " + what + "; extra = " + extra, Toast.LENGTH_LONG).show();
+        //actionNext(null);
         return false;
     }
 
@@ -536,8 +538,8 @@ public class MusicService extends Service implements
                 return;
             }
             setupAsForeground(song);
-            //m_mediaPlayer.prepare();
-            m_mediaPlayer.prepareAsync();
+            m_mediaPlayer.prepare();
+            //m_mediaPlayer.prepareAsync();
         } catch (IOException e) {
             e.printStackTrace();
         }

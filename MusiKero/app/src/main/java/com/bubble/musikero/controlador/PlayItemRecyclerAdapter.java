@@ -1,4 +1,4 @@
-package com.bubble.musikero.model.widgets;
+package com.bubble.musikero.controlador;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -9,6 +9,7 @@ import com.bubble.musikero.model.data.Folder;
 import com.bubble.musikero.model.data.PlayItem;
 import com.bubble.musikero.model.data.Playlist;
 import com.bubble.musikero.model.data.Song;
+import com.bubble.musikero.view.widgets.PlayItemViewHolder;
 
 import java.util.List;
 
@@ -32,7 +33,7 @@ public class PlayItemRecyclerAdapter extends RecyclerView.Adapter<PlayItemViewHo
     /**
      * @param onPlayItemRecyclerClick The listener that resolve the actions clicks above the holders.
      */
-    PlayItemRecyclerAdapter(
+    public PlayItemRecyclerAdapter(
             @NonNull PlayItemViewHolder.OnPlayItemViewHolderClickListener onPlayItemRecyclerClick) {
         this.m_onPlayItemViewHolderClickListener = onPlayItemRecyclerClick;
     }

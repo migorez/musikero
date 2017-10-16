@@ -1,4 +1,4 @@
-package com.bubble.musikero.model.widgets;
+package com.bubble.musikero.view;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -8,6 +8,8 @@ import android.support.v4.content.Loader;
 
 import com.bubble.musikero.model.PlayItemLoader;
 import com.bubble.musikero.model.data.PlayItem;
+import com.bubble.musikero.controlador.PlayItemRecyclerAdapter;
+import com.bubble.musikero.view.widgets.PlayItemViewHolder;
 
 import java.util.List;
 
@@ -22,7 +24,7 @@ public abstract class PlayItemFragment extends Fragment implements
     protected String                    m_tabTitle;
     protected PlayItemLoader            m_playItemLoader;
     protected PlayItemFragmentCallbacks m_playItemCallbacks;
-    protected PlayItemRecyclerAdapter   m_playItemListAdapter;
+    protected PlayItemRecyclerAdapter m_playItemListAdapter;
 
     // CONSTRUCTOR
 

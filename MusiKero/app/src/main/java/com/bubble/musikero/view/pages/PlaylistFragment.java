@@ -13,7 +13,7 @@ import android.widget.Toast;
 import com.bubble.musikero.R;
 import com.bubble.musikero.model.data.PlayItem;
 import com.bubble.musikero.model.data.Playlist;
-import com.bubble.musikero.model.widgets.PlayItemFragment;
+import com.bubble.musikero.view.PlayItemFragment;
 
 import java.util.List;
 

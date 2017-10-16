@@ -20,10 +20,9 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.bubble.musikero.R;
-import com.bubble.musikero.controlador.player.MediaMusicController;
+import com.bubble.musikero.view.widgets.MediaMusicController;
 import com.bubble.musikero.controlador.player.MusicService;
 import com.bubble.musikero.model.data.PlayItem;
-import com.bubble.musikero.model.widgets.PlayItemFragment;
 import com.bubble.musikero.view.pages.FolderFragment;
 import com.bubble.musikero.view.pages.PlaylistFragment;
 import com.bubble.musikero.view.pages.SongFragment;
@@ -38,7 +37,7 @@ public class MainActivity extends AppCompatActivity implements
     // ATTRIBUTES AND CONSTANTS
 
     private static final List<PlayItemFragment> PLAYITEM_PAGES = Collections.unmodifiableList(
-            new ArrayList<PlayItemFragment>(){
+            new ArrayList<PlayItemFragment>() {
                 {
                     add(SongFragment.newInstance());
                     add(FolderFragment.newInstance());
@@ -99,28 +98,30 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     /**
-     *
+     * android ServiceConnection that look for get the instance of the MusicService.
      */
     private final class MusicServiceConnetion implements ServiceConnection {
 
-        MusicServiceConnetion(){}
+        MusicServiceConnetion() {
+        }
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            MusicService.MusicServiceBinder musicBinder =  (MusicService.MusicServiceBinder) service;
-            m_musicService  = musicBinder.getMusicService();
+            MusicService.MusicServiceBinder musicBinder = (MusicService.MusicServiceBinder) service;
+            m_musicService = musicBinder.getMusicService();
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            m_musicService  = null;
+            m_musicService = null;
         }
 
     }
 
     // CONSTRUCT
 
-    public MainActivity() {}
+    public MainActivity() {
+    }
 
     // ACTIVITY LIFE
 
@@ -189,6 +190,7 @@ public class MainActivity extends AppCompatActivity implements
                 m_mediaController.setPlayerControlsListener(m_musicService);
                 m_mediaController.setAnchorView(findViewById(R.id.main_activity_container));
             }
+            m_mediaController.setEnabled(true);
             m_mediaController.show(/*13000*/); // default 3000 rested of my wished value
         }
     }

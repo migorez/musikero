@@ -1,8 +1,10 @@
-package com.bubble.musikero.controlador.player;
+package com.bubble.musikero.view.widgets;
 
 import android.content.Context;
 import android.view.View;
 import android.widget.MediaController;
+
+import com.bubble.musikero.controlador.player.MusicService;
 
 /**
  * Created by Miguel on 13/10/2017.
